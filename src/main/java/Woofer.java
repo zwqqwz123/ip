@@ -38,6 +38,8 @@ public class Woofer {
             try {
                 if ("list".equals(command)) {
                     printTaskList(taskList);
+                } else if (command.startsWith("delete ")) {
+                    deleteTask(taskList, command);
                 } else if (command.startsWith("mark ")) {
                     markTask(taskList, command, 5);
                 } else if (command.startsWith("unmark ")) {
@@ -107,7 +109,8 @@ public class Woofer {
         }
 
         throw new WooferException(
-                "I don't know what that means. Try todo, deadline, event, list, mark, or unmark.");
+                "I don't know what that means. Try todo, deadline, event, list, mark, "
+                        + "unmark, or delete.");
     }
 
     /**
@@ -148,6 +151,26 @@ public class Woofer {
             System.out.println("OK, I've marked this task as not done yet:");
             System.out.println("  [ ] " + task.getDescription());
         }
+    }
+
+    /**
+     * Deletes a task based on a command.
+     *
+     * @param taskList list containing the task
+     * @param command command entered by the user
+     * @throws WooferException when the task number is invalid or out of range
+     */
+    private static void deleteTask(TaskList taskList, String command)
+            throws WooferException {
+        int taskNumber = getTaskNumber(command, 7);
+        Task task = taskList.deleteTask(taskNumber);
+        if (task == null) {
+            throw new WooferException("That task does not exist.");
+        }
+
+        System.out.println("Noted. I've removed this task:");
+        System.out.println("  " + task.getDisplayText());
+        System.out.println("Now you have " + taskList.size() + " tasks in the list.");
     }
 
     /**

@@ -1,10 +1,11 @@
+import java.util.ArrayList;
+
 /**
  * Stores Woofer's tasks in memory.
  */
 public class TaskList {
     private static final int MAX_TASKS = 100;
-    private final Task[] tasks = new Task[MAX_TASKS];
-    private int taskCount;
+    private final ArrayList<Task> tasks = new ArrayList<>();
 
     /**
      * Adds a new task to the list.
@@ -23,12 +24,11 @@ public class TaskList {
      * @return true when the task was added, or false when the list is full
      */
     public boolean addTask(Task task) {
-        if (taskCount >= MAX_TASKS) {
+        if (tasks.size() >= MAX_TASKS) {
             return false;
         }
 
-        tasks[taskCount] = task;
-        taskCount++;
+        tasks.add(task);
         return true;
     }
 
@@ -38,7 +38,7 @@ public class TaskList {
      * @return the number of tasks
      */
     public int size() {
-        return taskCount;
+        return tasks.size();
     }
 
     /**
@@ -48,9 +48,22 @@ public class TaskList {
      * @return the task, or null when the number is outside the list
      */
     public Task getTask(int taskNumber) {
-        if (taskNumber < 1 || taskNumber > taskCount) {
+        if (taskNumber < 1 || taskNumber > tasks.size()) {
             return null;
         }
-        return tasks[taskNumber - 1];
+        return tasks.get(taskNumber - 1);
+    }
+
+    /**
+     * Removes and returns a task using its one-based number.
+     *
+     * @param taskNumber one-based task number
+     * @return the removed task, or null when the number is outside the list
+     */
+    public Task deleteTask(int taskNumber) {
+        if (taskNumber < 1 || taskNumber > tasks.size()) {
+            return null;
+        }
+        return tasks.remove(taskNumber - 1);
     }
 }
