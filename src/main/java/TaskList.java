@@ -13,11 +13,21 @@ public class TaskList {
      * @return true when the task was added, or false when the list is full
      */
     public boolean addTask(String description) {
+        return addTask(new Todo(description));
+    }
+
+    /**
+     * Adds a task of any supported type to the list.
+     *
+     * @param task task to add
+     * @return true when the task was added, or false when the list is full
+     */
+    public boolean addTask(Task task) {
         if (taskCount >= MAX_TASKS) {
             return false;
         }
 
-        tasks[taskCount] = new Task(description);
+        tasks[taskCount] = task;
         taskCount++;
         return true;
     }

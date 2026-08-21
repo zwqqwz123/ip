@@ -1,7 +1,7 @@
 /**
  * Represents one task in Woofer's in-memory task list.
  */
-public class Task {
+public abstract class Task {
     private final String description;
     private boolean isDone;
 
@@ -25,12 +25,38 @@ public class Task {
     }
 
     /**
+     * Returns the one-letter icon for this task type.
+     *
+     * @return the task type icon
+     */
+    public abstract String getTypeIcon();
+
+    /**
      * Returns the task description.
      *
      * @return the task description
      */
     public String getDescription() {
         return description;
+    }
+
+    /**
+     * Returns additional information displayed after the description.
+     *
+     * @return task-specific date/time information
+     */
+    protected String getDateDetails() {
+        return "";
+    }
+
+    /**
+     * Formats this task for the task list.
+     *
+     * @return the task type, completion status, description, and date details
+     */
+    public String getDisplayText() {
+        return "[" + getTypeIcon() + "][" + getStatusIcon() + "] "
+                + description + getDateDetails();
     }
 
     /**

@@ -39,8 +39,7 @@ public class Woofer {
                 System.out.println("Here are the tasks in your list:");
                 for (int i = 1; i <= taskList.size(); i++) {
                     Task task = taskList.getTask(i);
-                    System.out.println(i + ".[" + task.getStatusIcon() + "] "
-                            + task.getDescription());
+                    System.out.println(i + "." + task.getDisplayText());
                 }
             } else if (command.startsWith("mark ")) {
                 int taskNumber = getTaskNumber(command, 5);
@@ -63,15 +62,70 @@ public class Woofer {
                     System.out.println("  [ ] " + task.getDescription());
                 }
             } else {
-                if (taskList.addTask(command)) {
-                    System.out.println("added: " + command);
+                Task task = parseTask(command);
+                if (task == null) {
+                    System.out.println("Task format is invalid!");
                 } else {
-                    System.out.println("Task list is full!");
+                    printAddedTask(taskList, task);
                 }
             }
 
             System.out.println(separator);
         }
+    }
+
+    /**
+     * Creates a typed task from a user command.
+     *
+     * @param command command entered by the user
+     * @return a typed task, or null when a deadline/event command is malformed
+     */
+    private static Task parseTask(String command) {
+        if (command.startsWith("todo ")) {
+            return new Todo(command.substring(5));
+        }
+
+        if (command.startsWith("deadline ")) {
+            int byMarker = command.indexOf(" /by ");
+            if (byMarker < 0) {
+                return null;
+            }
+            String description = command.substring(9, byMarker);
+            String by = command.substring(byMarker + 5);
+            return new Deadline(description, by);
+        }
+
+        if (command.startsWith("event ")) {
+            int fromMarker = command.indexOf(" /from ");
+            int toMarker = command.indexOf(" /to ", fromMarker + 7);
+            if (fromMarker < 0 || toMarker < 0) {
+                return null;
+            }
+            String description = command.substring(6, fromMarker);
+            String from = command.substring(fromMarker + 7, toMarker);
+            String to = command.substring(toMarker + 5);
+            return new Event(description, from, to);
+        }
+
+        // Keep accepting untyped text as a Todo for backwards compatibility.
+        return new Todo(command);
+    }
+
+    /**
+     * Adds a task and prints the confirmation shown to the user.
+     *
+     * @param taskList list to update
+     * @param task task to add
+     */
+    private static void printAddedTask(TaskList taskList, Task task) {
+        if (!taskList.addTask(task)) {
+            System.out.println("Task list is full!");
+            return;
+        }
+
+        System.out.println("Got it. I've added this task:");
+        System.out.println("  " + task.getDisplayText());
+        System.out.println("Now you have " + taskList.size() + " tasks in the list.");
     }
 
     /**
