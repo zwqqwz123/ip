@@ -1,11 +1,11 @@
 import java.util.Scanner;
 
 /**
- * A simple command-line chatbot that echoes commands until the user says bye.
+ * A simple command-line chatbot that stores tasks until the user says bye.
  */
 public class Woofer {
     /**
-     * Starts Woofer, reads commands from standard input, and exits on "bye".
+     * Starts Woofer, stores commands, lists stored tasks, and exits on "bye".
      *
      * @param args command-line arguments, which are not used
      */
@@ -23,6 +23,8 @@ public class Woofer {
         System.out.println("What can I do for you?");
         System.out.println(separator);
 
+        String[] tasks = new String[100];
+        int taskCount = 0;
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
@@ -34,7 +36,16 @@ public class Woofer {
                 break;
             }
 
-            System.out.println(command);
+            if ("list".equals(command)) {
+                for (int i = 0; i < taskCount; i++) {
+                    System.out.println((i + 1) + ". " + tasks[i]);
+                }
+            } else {
+                tasks[taskCount] = command;
+                taskCount++;
+                System.out.println("added: " + command);
+            }
+
             System.out.println(separator);
         }
     }
