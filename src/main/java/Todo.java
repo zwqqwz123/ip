@@ -5,14 +5,9 @@ public class Todo extends Task {
     /**
      * Creates a new todo task.
      *
-     * @param description text describing the task
+    * @param description text describing the task
      */
     public Todo(String description) {
-        super(description);
-    }
-
-    @Override
-    public String getTypeIcon() {
-        return "T";
+        super(description, TaskType.TODO);
     }
 }

@@ -3,15 +3,18 @@
  */
 public abstract class Task {
     private final String description;
+    private final TaskType type;
     private boolean isDone;
 
     /**
      * Creates a new task that is initially not done.
      *
      * @param description text describing the task
+     * @param type type of task being created
      */
-    public Task(String description) {
+    protected Task(String description, TaskType type) {
         this.description = description;
+        this.type = type;
         this.isDone = false;
     }
 
@@ -29,7 +32,9 @@ public abstract class Task {
      *
      * @return the task type icon
      */
-    public abstract String getTypeIcon();
+    public String getTypeIcon() {
+        return type.getIcon();
+    }
 
     /**
      * Returns the task description.
