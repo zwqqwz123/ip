@@ -35,39 +35,18 @@ public class Woofer {
                 break;
             }
 
-            if ("list".equals(command)) {
-                System.out.println("Here are the tasks in your list:");
-                for (int i = 1; i <= taskList.size(); i++) {
-                    Task task = taskList.getTask(i);
-                    System.out.println(i + "." + task.getDisplayText());
-                }
-            } else if (command.startsWith("mark ")) {
-                int taskNumber = getTaskNumber(command, 5);
-                Task task = taskList.getTask(taskNumber);
-                if (task == null) {
-                    System.out.println("Task does not exist!");
+            try {
+                if ("list".equals(command)) {
+                    printTaskList(taskList);
+                } else if (command.startsWith("mark ")) {
+                    markTask(taskList, command, 5);
+                } else if (command.startsWith("unmark ")) {
+                    markTask(taskList, command, 7);
                 } else {
-                    task.markAsDone();
-                    System.out.println("Nice! I've marked this task as done:");
-                    System.out.println("  [X] " + task.getDescription());
+                    printAddedTask(taskList, parseTask(command));
                 }
-            } else if (command.startsWith("unmark ")) {
-                int taskNumber = getTaskNumber(command, 7);
-                Task task = taskList.getTask(taskNumber);
-                if (task == null) {
-                    System.out.println("Task does not exist!");
-                } else {
-                    task.markAsNotDone();
-                    System.out.println("OK, I've marked this task as not done yet:");
-                    System.out.println("  [ ] " + task.getDescription());
-                }
-            } else {
-                Task task = parseTask(command);
-                if (task == null) {
-                    System.out.println("Task format is invalid!");
-                } else {
-                    printAddedTask(taskList, task);
-                }
+            } catch (WooferException exception) {
+                System.out.println("OOPS!!! " + exception.getMessage());
             }
 
             System.out.println(separator);
@@ -78,37 +57,97 @@ public class Woofer {
      * Creates a typed task from a user command.
      *
      * @param command command entered by the user
-     * @return a typed task, or null when a deadline/event command is malformed
+     * @return a typed task
+     * @throws WooferException when the command is unknown or malformed
      */
-    private static Task parseTask(String command) {
-        if (command.startsWith("todo ")) {
-            return new Todo(command.substring(5));
+    private static Task parseTask(String command) throws WooferException {
+        if ("todo".equals(command) || command.startsWith("todo ")) {
+            String description = command.length() > 5 ? command.substring(5).trim() : "";
+            if (description.isBlank()) {
+                throw new WooferException("The description of a todo cannot be empty.");
+            }
+            return new Todo(description);
         }
 
-        if (command.startsWith("deadline ")) {
-            int byMarker = command.indexOf(" /by ");
+        if ("deadline".equals(command) || command.startsWith("deadline ")) {
+            String details = command.length() > 9 ? command.substring(9).trim() : "";
+            int byMarker = details.indexOf(" /by ");
             if (byMarker < 0) {
-                return null;
+                throw new WooferException("A deadline must include /by followed by a date or time.");
             }
-            String description = command.substring(9, byMarker);
-            String by = command.substring(byMarker + 5);
+            String description = details.substring(0, byMarker).trim();
+            String by = details.substring(byMarker + 5).trim();
+            if (description.isBlank()) {
+                throw new WooferException("The description of a deadline cannot be empty.");
+            }
+            if (by.isBlank()) {
+                throw new WooferException("A deadline must include a date or time after /by.");
+            }
             return new Deadline(description, by);
         }
 
-        if (command.startsWith("event ")) {
-            int fromMarker = command.indexOf(" /from ");
-            int toMarker = command.indexOf(" /to ", fromMarker + 7);
+        if ("event".equals(command) || command.startsWith("event ")) {
+            String details = command.length() > 6 ? command.substring(6).trim() : "";
+            int fromMarker = details.indexOf(" /from ");
+            int toMarker = details.indexOf(" /to ", fromMarker + 7);
             if (fromMarker < 0 || toMarker < 0) {
-                return null;
+                throw new WooferException(
+                        "An event must include /from and /to date or time details.");
             }
-            String description = command.substring(6, fromMarker);
-            String from = command.substring(fromMarker + 7, toMarker);
-            String to = command.substring(toMarker + 5);
+            String description = details.substring(0, fromMarker).trim();
+            String from = details.substring(fromMarker + 7, toMarker).trim();
+            String to = details.substring(toMarker + 5).trim();
+            if (description.isBlank()) {
+                throw new WooferException("The description of an event cannot be empty.");
+            }
+            if (from.isBlank() || to.isBlank()) {
+                throw new WooferException("An event must include both start and end details.");
+            }
             return new Event(description, from, to);
         }
 
-        // Keep accepting untyped text as a Todo for backwards compatibility.
-        return new Todo(command);
+        throw new WooferException(
+                "I don't know what that means. Try todo, deadline, event, list, mark, or unmark.");
+    }
+
+    /**
+     * Prints all tasks in the task list.
+     *
+     * @param taskList list to display
+     */
+    private static void printTaskList(TaskList taskList) {
+        System.out.println("Here are the tasks in your list:");
+        for (int i = 1; i <= taskList.size(); i++) {
+            Task task = taskList.getTask(i);
+            System.out.println(i + "." + task.getDisplayText());
+        }
+    }
+
+    /**
+     * Marks or unmarks a task based on a command.
+     *
+     * @param taskList list containing the task
+     * @param command command entered by the user
+     * @param prefixLength length of the command prefix before the number
+     * @throws WooferException when the task number is invalid or out of range
+     */
+    private static void markTask(TaskList taskList, String command, int prefixLength)
+            throws WooferException {
+        int taskNumber = getTaskNumber(command, prefixLength);
+        Task task = taskList.getTask(taskNumber);
+        if (task == null) {
+            throw new WooferException("That task does not exist.");
+        }
+
+        if (command.startsWith("mark ")) {
+            task.markAsDone();
+            System.out.println("Nice! I've marked this task as done:");
+            System.out.println("  [X] " + task.getDescription());
+        } else {
+            task.markAsNotDone();
+            System.out.println("OK, I've marked this task as not done yet:");
+            System.out.println("  [ ] " + task.getDescription());
+        }
     }
 
     /**
@@ -116,11 +155,11 @@ public class Woofer {
      *
      * @param taskList list to update
      * @param task task to add
+     * @throws WooferException when the task list is full
      */
-    private static void printAddedTask(TaskList taskList, Task task) {
+    private static void printAddedTask(TaskList taskList, Task task) throws WooferException {
         if (!taskList.addTask(task)) {
-            System.out.println("Task list is full!");
-            return;
+            throw new WooferException("The task list is full.");
         }
 
         System.out.println("Got it. I've added this task:");
@@ -129,17 +168,18 @@ public class Woofer {
     }
 
     /**
-     * Converts the one-based task number in a command into a zero-based index.
+     * Converts the task number in a command into a one-based task number.
      *
      * @param command command containing a task number
      * @param prefixLength length of the command prefix before the number
-     * @return the zero-based task index, or -1 when the number is invalid
+     * @return the one-based task number
+     * @throws WooferException when the number is not valid
      */
-    private static int getTaskNumber(String command, int prefixLength) {
+    private static int getTaskNumber(String command, int prefixLength) throws WooferException {
         try {
             return Integer.parseInt(command.substring(prefixLength));
         } catch (NumberFormatException exception) {
-            return -1;
+            throw new WooferException("Please provide a valid task number.");
         }
     }
 }
