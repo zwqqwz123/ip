@@ -1,11 +1,12 @@
 import java.util.Scanner;
 
 /**
- * A simple command-line chatbot that stores tasks until the user says bye.
+ * A simple command-line chatbot that stores and tracks tasks until the user
+ * says bye.
  */
 public class Woofer {
     /**
-     * Starts Woofer, stores commands, lists stored tasks, and exits on "bye".
+     * Starts Woofer, manages stored tasks, and exits on "bye".
      *
      * @param args command-line arguments, which are not used
      */
@@ -24,6 +25,7 @@ public class Woofer {
         System.out.println(separator);
 
         String[] tasks = new String[100];
+        boolean[] completed = new boolean[100];
         int taskCount = 0;
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
@@ -37,8 +39,28 @@ public class Woofer {
             }
 
             if ("list".equals(command)) {
+                System.out.println("Here are the tasks in your list:");
                 for (int i = 0; i < taskCount; i++) {
-                    System.out.println((i + 1) + ". " + tasks[i]);
+                    String status = completed[i] ? "X" : " ";
+                    System.out.println((i + 1) + ".[" + status + "] " + tasks[i]);
+                }
+            } else if (command.startsWith("mark ")) {
+                int taskIndex = getTaskIndex(command, 5);
+                if (taskIndex < 0 || taskIndex >= taskCount) {
+                    System.out.println("Task does not exist!");
+                } else {
+                    completed[taskIndex] = true;
+                    System.out.println("Nice! I've marked this task as done:");
+                    System.out.println("  [X] " + tasks[taskIndex]);
+                }
+            } else if (command.startsWith("unmark ")) {
+                int taskIndex = getTaskIndex(command, 7);
+                if (taskIndex < 0 || taskIndex >= taskCount) {
+                    System.out.println("Task does not exist!");
+                } else {
+                    completed[taskIndex] = false;
+                    System.out.println("OK, I've marked this task as not done yet:");
+                    System.out.println("  [ ] " + tasks[taskIndex]);
                 }
             } else {
                 tasks[taskCount] = command;
@@ -47,6 +69,21 @@ public class Woofer {
             }
 
             System.out.println(separator);
+        }
+    }
+
+    /**
+     * Converts the one-based task number in a command into a zero-based index.
+     *
+     * @param command command containing a task number
+     * @param prefixLength length of the command prefix before the number
+     * @return the zero-based task index, or -1 when the number is invalid
+     */
+    private static int getTaskIndex(String command, int prefixLength) {
+        try {
+            return Integer.parseInt(command.substring(prefixLength)) - 1;
+        } catch (NumberFormatException exception) {
+            return -1;
         }
     }
 }
