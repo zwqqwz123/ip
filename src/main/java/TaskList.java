@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Stores Woofer's tasks in memory.
@@ -39,6 +40,15 @@ public class TaskList {
      */
     public int size() {
         return tasks.size();
+    }
+
+    /**
+     * Returns the tasks in insertion order.
+     *
+     * @return an unmodifiable snapshot of the stored tasks
+     */
+    public List<Task> getTasks() {
+        return List.copyOf(tasks);
     }
 
     /**

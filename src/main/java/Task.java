@@ -46,6 +46,15 @@ public abstract class Task {
     }
 
     /**
+     * Returns whether this task has been marked as done.
+     *
+     * @return {@code true} when the task is done, or {@code false} otherwise.
+     */
+    public boolean isDone() {
+        return isDone;
+    }
+
+    /**
      * Returns additional information displayed after the description.
      *
      * @return task-specific date/time information

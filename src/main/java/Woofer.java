@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -23,7 +24,8 @@ public class Woofer {
         System.out.println("What can I do for you?");
         System.out.println(separator);
 
-        TaskList taskList = new TaskList();
+        Storage storage = new Storage();
+        TaskList taskList = loadTaskList(storage);
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
@@ -39,19 +41,48 @@ public class Woofer {
                 if ("list".equals(command)) {
                     printTaskList(taskList);
                 } else if (command.startsWith("delete ")) {
-                    deleteTask(taskList, command);
+                    deleteTask(taskList, command, storage);
                 } else if (command.startsWith("mark ")) {
-                    markTask(taskList, command, 5);
+                    markTask(taskList, command, 5, storage);
                 } else if (command.startsWith("unmark ")) {
-                    markTask(taskList, command, 7);
+                    markTask(taskList, command, 7, storage);
                 } else {
-                    printAddedTask(taskList, parseTask(command));
+                    printAddedTask(taskList, parseTask(command), storage);
                 }
             } catch (WooferException exception) {
                 System.out.println("OOPS!!! " + exception.getMessage());
             }
 
             System.out.println(separator);
+        }
+    }
+
+    /**
+     * Loads saved tasks, falling back to an empty list when storage cannot be read.
+     *
+     * @param storage source of saved tasks.
+     * @return the loaded tasks, or an empty list when loading fails.
+     */
+    private static TaskList loadTaskList(Storage storage) {
+        try {
+            return storage.load();
+        } catch (IOException exception) {
+            System.out.println("Warning: Could not load saved tasks. Starting with an empty list.");
+            return new TaskList();
+        }
+    }
+
+    /**
+     * Saves the current tasks and reports a warning when storage cannot be written.
+     *
+     * @param storage destination for saved tasks.
+     * @param taskList tasks to save.
+     */
+    private static void saveTaskList(Storage storage, TaskList taskList) {
+        try {
+            storage.save(taskList);
+        } catch (IOException exception) {
+            System.out.println("Warning: Could not save your tasks.");
         }
     }
 
@@ -132,9 +163,11 @@ public class Woofer {
      * @param taskList list containing the task
      * @param command command entered by the user
      * @param prefixLength length of the command prefix before the number
+     * @param storage destination for saved tasks.
      * @throws WooferException when the task number is invalid or out of range
      */
-    private static void markTask(TaskList taskList, String command, int prefixLength)
+    private static void markTask(
+            TaskList taskList, String command, int prefixLength, Storage storage)
             throws WooferException {
         int taskNumber = getTaskNumber(command, prefixLength);
         Task task = taskList.getTask(taskNumber);
@@ -151,6 +184,7 @@ public class Woofer {
             System.out.println("OK, I've marked this task as not done yet:");
             System.out.println("  [ ] " + task.getDescription());
         }
+        saveTaskList(storage, taskList);
     }
 
     /**
@@ -158,9 +192,10 @@ public class Woofer {
      *
      * @param taskList list containing the task
      * @param command command entered by the user
+     * @param storage destination for saved tasks.
      * @throws WooferException when the task number is invalid or out of range
      */
-    private static void deleteTask(TaskList taskList, String command)
+    private static void deleteTask(TaskList taskList, String command, Storage storage)
             throws WooferException {
         int taskNumber = getTaskNumber(command, 7);
         Task task = taskList.deleteTask(taskNumber);
@@ -171,6 +206,7 @@ public class Woofer {
         System.out.println("Noted. I've removed this task:");
         System.out.println("  " + task.getDisplayText());
         System.out.println("Now you have " + taskList.size() + " tasks in the list.");
+        saveTaskList(storage, taskList);
     }
 
     /**
@@ -178,9 +214,11 @@ public class Woofer {
      *
      * @param taskList list to update
      * @param task task to add
+     * @param storage destination for saved tasks.
      * @throws WooferException when the task list is full
      */
-    private static void printAddedTask(TaskList taskList, Task task) throws WooferException {
+    private static void printAddedTask(TaskList taskList, Task task, Storage storage)
+            throws WooferException {
         if (!taskList.addTask(task)) {
             throw new WooferException("The task list is full.");
         }
@@ -188,6 +226,7 @@ public class Woofer {
         System.out.println("Got it. I've added this task:");
         System.out.println("  " + task.getDisplayText());
         System.out.println("Now you have " + taskList.size() + " tasks in the list.");
+        saveTaskList(storage, taskList);
     }
 
     /**
