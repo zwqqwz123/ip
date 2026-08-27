@@ -1,3 +1,5 @@
+package woofer.task;
+
 /**
  * Represents one task in Woofer's in-memory task list.
  */

@@ -1,3 +1,5 @@
+package woofer.task;
+
 /**
  * A task without an associated date or time.
  */

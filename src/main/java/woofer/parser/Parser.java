@@ -1,6 +1,14 @@
+package woofer.parser;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
+import woofer.exception.WooferException;
+import woofer.task.Deadline;
+import woofer.task.Event;
+import woofer.task.Task;
+import woofer.task.Todo;
 
 /**
  * Interprets user commands and creates the corresponding task objects.
