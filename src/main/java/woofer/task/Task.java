@@ -11,8 +11,8 @@ public abstract class Task {
     /**
      * Creates a new task that is initially not done.
      *
-     * @param description text describing the task
-     * @param type type of task being created
+     * @param description text describing the task.
+     * @param type type of task being created.
      */
     protected Task(String description, TaskType type) {
         this.description = description;
@@ -23,7 +23,7 @@ public abstract class Task {
     /**
      * Returns the task's status icon.
      *
-     * @return {@code X} when done, or a blank space otherwise
+     * @return {@code X} when done, or a blank space otherwise.
      */
     public String getStatusIcon() {
         return isDone ? "X" : " ";
@@ -32,7 +32,7 @@ public abstract class Task {
     /**
      * Returns the one-letter icon for this task type.
      *
-     * @return the task type icon
+     * @return the task type icon.
      */
     public String getTypeIcon() {
         return type.getIcon();
@@ -41,7 +41,7 @@ public abstract class Task {
     /**
      * Returns the task description.
      *
-     * @return the task description
+     * @return the task description.
      */
     public String getDescription() {
         return description;
@@ -59,7 +59,7 @@ public abstract class Task {
     /**
      * Returns additional information displayed after the description.
      *
-     * @return task-specific date/time information
+     * @return task-specific date/time information.
      */
     protected String getDateDetails() {
         return "";
@@ -68,7 +68,7 @@ public abstract class Task {
     /**
      * Formats this task for the task list.
      *
-     * @return the task type, completion status, description, and date details
+     * @return the task type, completion status, description, and date details.
      */
     public String getDisplayText() {
         return "[" + getTypeIcon() + "][" + getStatusIcon() + "] "

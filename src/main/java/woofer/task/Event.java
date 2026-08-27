@@ -47,7 +47,7 @@ public class Event extends Task {
     /**
      * Returns the formatted event dates for display.
      *
-     * @return the formatted event date details
+     * @return the formatted event date details.
      */
     @Override
     protected String getDateDetails() {

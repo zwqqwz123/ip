@@ -22,7 +22,7 @@ public class ParserTest {
     /**
      * Verifies that a todo command creates a todo with the expected description.
      *
-     * @throws WooferException when the valid command cannot be parsed
+     * @throws WooferException when the valid command cannot be parsed.
      */
     @Test
     public void parseTodoCommandCreatesTodo() throws WooferException {
@@ -36,7 +36,7 @@ public class ParserTest {
     /**
      * Verifies that a deadline command parses its date as a local date.
      *
-     * @throws WooferException when the valid command cannot be parsed
+     * @throws WooferException when the valid command cannot be parsed.
      */
     @Test
     public void parseDeadlineCommandParsesDate() throws WooferException {
@@ -60,7 +60,7 @@ public class ParserTest {
     /**
      * Verifies that a task number is extracted from a mark command.
      *
-     * @throws WooferException when the valid command cannot be parsed
+     * @throws WooferException when the valid command cannot be parsed.
      */
     @Test
     public void parseTaskNumberExtractsMarkNumber() throws WooferException {

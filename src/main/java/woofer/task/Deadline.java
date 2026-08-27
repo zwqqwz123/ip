@@ -35,7 +35,7 @@ public class Deadline extends Task {
     /**
      * Returns the formatted deadline details for display.
      *
-     * @return the formatted deadline date
+     * @return the formatted deadline date.
      */
     @Override
     protected String getDateDetails() {
