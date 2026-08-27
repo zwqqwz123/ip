@@ -1,10 +1,15 @@
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 /**
  * A simple command-line chatbot that manages tasks until the user says bye.
  */
 public class Woofer {
+    private static final DateTimeFormatter INPUT_DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
+
     /**
      * Starts Woofer, manages stored tasks, and exits on "bye".
      *
@@ -116,7 +121,7 @@ public class Woofer {
             if (by.isBlank()) {
                 throw new WooferException("A deadline must include a date or time after /by.");
             }
-            return new Deadline(description, by);
+            return new Deadline(description, parseDate(by));
         }
 
         if ("event".equals(command) || command.startsWith("event ")) {
@@ -136,12 +141,27 @@ public class Woofer {
             if (from.isBlank() || to.isBlank()) {
                 throw new WooferException("An event must include both start and end details.");
             }
-            return new Event(description, from, to);
+            return new Event(description, parseDate(from), parseDate(to));
         }
 
         throw new WooferException(
                 "I don't know what that means. Try todo, deadline, event, list, mark, "
-                        + "unmark, or delete.");
+                + "unmark, or delete.");
+    }
+
+    /**
+     * Parses a date entered in ISO local-date format.
+     *
+     * @param date date entered by the user.
+     * @return the parsed date.
+     * @throws WooferException when the date does not use the yyyy-MM-dd format.
+     */
+    private static LocalDate parseDate(String date) throws WooferException {
+        try {
+            return LocalDate.parse(date, INPUT_DATE_FORMAT);
+        } catch (DateTimeParseException exception) {
+            throw new WooferException("Please use dates in yyyy-MM-dd format.");
+        }
     }
 
     /**
