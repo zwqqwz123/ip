@@ -19,8 +19,8 @@ public class TaskList {
     /**
      * Adds a new task to the list.
      *
-     * @param description text describing the task
-     * @return true when the task was added, or false when the list is full
+     * @param description text describing the task.
+     * @return true when the task was added, or false when the list is full.
      */
     public boolean addTask(String description) {
         return addTask(new Todo(description));
@@ -29,8 +29,8 @@ public class TaskList {
     /**
      * Adds a task of any supported type to the list.
      *
-     * @param task task to add
-     * @return true when the task was added, or false when the list is full
+     * @param task task to add.
+     * @return true when the task was added, or false when the list is full.
      */
     public boolean addTask(Task task) {
         if (tasks.size() >= MAX_TASKS) {
@@ -44,7 +44,7 @@ public class TaskList {
     /**
      * Returns the number of tasks currently stored.
      *
-     * @return the number of tasks
+     * @return the number of tasks.
      */
     public int size() {
         return tasks.size();
@@ -53,7 +53,7 @@ public class TaskList {
     /**
      * Returns the tasks in insertion order.
      *
-     * @return an unmodifiable snapshot of the stored tasks
+     * @return an unmodifiable snapshot of the stored tasks.
      */
     public List<Task> getTasks() {
         return List.copyOf(tasks);
@@ -62,8 +62,8 @@ public class TaskList {
     /**
      * Looks up a task using its one-based number from the user interface.
      *
-     * @param taskNumber one-based task number
-     * @return the task, or null when the number is outside the list
+     * @param taskNumber one-based task number.
+     * @return the task, or null when the number is outside the list.
      */
     public Task getTask(int taskNumber) {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
@@ -75,8 +75,8 @@ public class TaskList {
     /**
      * Removes and returns a task using its one-based number.
      *
-     * @param taskNumber one-based task number
-     * @return the removed task, or null when the number is outside the list
+     * @param taskNumber one-based task number.
+     * @return the removed task, or null when the number is outside the list.
      */
     public Task deleteTask(int taskNumber) {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
