@@ -3,6 +3,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,14 +118,14 @@ public class Storage {
         }
         case "D" -> {
             requireFieldCount(fields, 4);
-            yield new Deadline(requireField(fields, 2), requireField(fields, 3));
+            yield new Deadline(requireField(fields, 2), parseDate(requireField(fields, 3)));
         }
         case "E" -> {
             requireFieldCount(fields, 5);
             yield new Event(
                     requireField(fields, 2),
-                    requireField(fields, 3),
-                    requireField(fields, 4));
+                    parseDate(requireField(fields, 3)),
+                    parseDate(requireField(fields, 4)));
         }
         default -> throw new IllegalArgumentException("Unknown task type: " + fields[0]);
         };
@@ -132,6 +134,21 @@ public class Storage {
             task.markAsDone();
         }
         return task;
+    }
+
+    /**
+     * Parses an ISO local date stored in a task record.
+     *
+     * @param date saved date.
+     * @return the parsed date.
+     * @throws IllegalArgumentException when the date is invalid.
+     */
+    private LocalDate parseDate(String date) {
+        try {
+            return LocalDate.parse(date);
+        } catch (DateTimeParseException exception) {
+            throw new IllegalArgumentException("Invalid date in task record.", exception);
+        }
     }
 
     /**
@@ -194,7 +211,7 @@ public class Storage {
                     "D",
                     status,
                     task.getDescription(),
-                    deadline.getBy());
+                    deadline.getBy().toString());
         }
         if (task instanceof Event event) {
             return String.join(
@@ -202,8 +219,8 @@ public class Storage {
                     "E",
                     status,
                     task.getDescription(),
-                    event.getFrom(),
-                    event.getTo());
+                    event.getFrom().toString(),
+                    event.getTo().toString());
         }
         return String.join(FIELD_SEPARATOR, "T", status, task.getDescription());
     }
