@@ -3,7 +3,7 @@ import java.util.ArrayList;
 /**
  * Stores Woofer's tasks in memory.
  */
-public classTaskList {
+public class TaskList {
     private static final int MAX_TASKS = 100;
     private final ArrayList<Task> tasks = new ArrayList<>();
 
