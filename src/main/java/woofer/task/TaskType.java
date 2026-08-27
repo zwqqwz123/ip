@@ -4,8 +4,11 @@ package woofer.task;
  * The fixed set of task types supported by Woofer.
  */
 public enum TaskType {
+    /** Represents a task without an associated date. */
     TODO("T"),
+    /** Represents a task with a completion date. */
     DEADLINE("D"),
+    /** Represents a task with a start and end date. */
     EVENT("E");
 
     private final String icon;

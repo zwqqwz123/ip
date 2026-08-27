@@ -11,6 +11,12 @@ public class TaskList {
     private final ArrayList<Task> tasks = new ArrayList<>();
 
     /**
+     * Creates an empty task list.
+     */
+    public TaskList() {
+    }
+
+    /**
      * Adds a new task to the list.
      *
      * @param description text describing the task

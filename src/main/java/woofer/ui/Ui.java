@@ -19,6 +19,12 @@ public class Ui {
     private final Scanner scanner = new Scanner(System.in);
 
     /**
+     * Creates a user interface that reads commands from standard input.
+     */
+    public Ui() {
+    }
+
+    /**
      * Displays Woofer's welcome message.
      */
     public void showWelcome() {

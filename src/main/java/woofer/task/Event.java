@@ -44,6 +44,11 @@ public class Event extends Task {
         return to;
     }
 
+    /**
+     * Returns the formatted event dates for display.
+     *
+     * @return the formatted event date details
+     */
     @Override
     protected String getDateDetails() {
         return " (from: " + from.format(DISPLAY_DATE_FORMAT)
