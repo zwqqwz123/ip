@@ -1,3 +1,5 @@
+package woofer.exception;
+
 /**
  * Represents an expected input error reported by Woofer.
  */

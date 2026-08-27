@@ -1,3 +1,5 @@
+package woofer.storage;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -7,6 +9,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+import woofer.task.Deadline;
+import woofer.task.Event;
+import woofer.task.Task;
+import woofer.task.TaskList;
+import woofer.task.Todo;
 
 /**
  * Stores and loads Woofer tasks from a local data file.

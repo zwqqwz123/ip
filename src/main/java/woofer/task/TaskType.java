@@ -1,3 +1,5 @@
+package woofer.task;
+
 /**
  * The fixed set of task types supported by Woofer.
  */

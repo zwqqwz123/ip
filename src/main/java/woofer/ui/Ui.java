@@ -1,4 +1,9 @@
+package woofer.ui;
+
 import java.util.Scanner;
+
+import woofer.task.Task;
+import woofer.task.TaskList;
 
 /**
  * Handles user input and output for Woofer.

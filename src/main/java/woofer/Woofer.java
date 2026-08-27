@@ -1,4 +1,13 @@
+package woofer;
+
 import java.io.IOException;
+
+import woofer.exception.WooferException;
+import woofer.parser.Parser;
+import woofer.storage.Storage;
+import woofer.task.Task;
+import woofer.task.TaskList;
+import woofer.ui.Ui;
 
 /**
  * Coordinates Woofer's user interface, command parser, storage, and task list.
