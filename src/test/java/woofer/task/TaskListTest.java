@@ -62,6 +62,23 @@ public class TaskListTest {
     }
 
     /**
+     * Verifies that finding tasks is case-insensitive and preserves insertion order.
+     */
+    @Test
+    public void findTasksMatchesKeywordCaseInsensitively() {
+        TaskList taskList = new TaskList();
+        Task firstMatch = new Todo("Read a Book");
+        Task nonMatch = new Todo("Write a report");
+        Task secondMatch = new Todo("Return the book");
+        taskList.addTask(firstMatch);
+        taskList.addTask(nonMatch);
+        taskList.addTask(secondMatch);
+
+        assertEquals(List.of(firstMatch, secondMatch), taskList.findTasks("BOOK"));
+        assertTrue(taskList.findTasks("holiday").isEmpty());
+    }
+
+    /**
      * Verifies that the task list rejects tasks beyond its capacity.
      */
     @Test

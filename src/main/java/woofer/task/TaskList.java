@@ -2,6 +2,7 @@ package woofer.task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Stores Woofer's tasks in memory.
@@ -57,6 +58,30 @@ public class TaskList {
      */
     public List<Task> getTasks() {
         return List.copyOf(tasks);
+    }
+
+    /**
+     * Finds tasks whose descriptions contain the specified keyword.
+     *
+     * <p>The search is case-insensitive and preserves the tasks' insertion order.</p>
+     *
+     * @param keyword text to search for.
+     * @return an unmodifiable list of matching tasks, or an empty list for a blank keyword.
+     */
+    public List<Task> findTasks(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return List.of();
+        }
+
+        String normalizedKeyword = keyword.toLowerCase(Locale.ROOT);
+        ArrayList<Task> matchingTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            String description = task.getDescription().toLowerCase(Locale.ROOT);
+            if (description.contains(normalizedKeyword)) {
+                matchingTasks.add(task);
+            }
+        }
+        return List.copyOf(matchingTasks);
     }
 
     /**

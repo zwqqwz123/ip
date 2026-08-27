@@ -88,6 +88,7 @@ public class Woofer {
             throws WooferException {
         switch (commandType) {
         case LIST -> ui.showTaskList(taskList);
+        case FIND -> findTasks(parser.parseFindKeyword(command));
         case DELETE -> deleteTask(parser.parseTaskNumber(command, commandType));
         case MARK -> markTask(parser.parseTaskNumber(command, commandType), true);
         case UNMARK -> markTask(parser.parseTaskNumber(command, commandType), false);
@@ -96,6 +97,15 @@ public class Woofer {
             // The exit command is handled before this method is called.
         }
         }
+    }
+
+    /**
+     * Displays tasks whose descriptions contain the specified keyword.
+     *
+     * @param keyword text to search for.
+     */
+    private void findTasks(String keyword) {
+        ui.showMatchingTasks(taskList.findTasks(keyword));
     }
 
     /**

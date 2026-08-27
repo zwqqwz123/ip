@@ -58,6 +58,25 @@ public class ParserTest {
     }
 
     /**
+     * Verifies that a find command is recognized and its keyword is extracted.
+     *
+     * @throws WooferException when the valid command cannot be parsed.
+     */
+    @Test
+    public void parseFindCommandExtractsKeyword() throws WooferException {
+        assertEquals(Parser.CommandType.FIND, parser.parseCommandType("find book"));
+        assertEquals("book", parser.parseFindKeyword("find book"));
+    }
+
+    /**
+     * Verifies that a find command without a keyword is rejected.
+     */
+    @Test
+    public void parseFindCommandRejectsBlankKeyword() {
+        assertThrows(WooferException.class, () -> parser.parseFindKeyword("find "));
+    }
+
+    /**
      * Verifies that a task number is extracted from a mark command.
      *
      * @throws WooferException when the valid command cannot be parsed.
