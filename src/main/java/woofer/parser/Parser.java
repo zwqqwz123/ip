@@ -16,6 +16,7 @@ import woofer.task.Todo;
 public class Parser {
     private static final DateTimeFormatter INPUT_DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final int DELETE_PREFIX_LENGTH = 7;
+    private static final int FIND_PREFIX_LENGTH = 5;
     private static final int MARK_PREFIX_LENGTH = 5;
     private static final int UNMARK_PREFIX_LENGTH = 7;
 
@@ -33,6 +34,8 @@ public class Parser {
         EXIT,
         /** Indicates that the user wants to view all tasks. */
         LIST,
+        /** Indicates that the user wants to find tasks by keyword. */
+        FIND,
         /** Indicates that the user wants to delete a task. */
         DELETE,
         /** Indicates that the user wants to mark a task as done. */
@@ -56,6 +59,9 @@ public class Parser {
         if ("list".equals(command)) {
             return CommandType.LIST;
         }
+        if ("find".equals(command) || command.startsWith("find ")) {
+            return CommandType.FIND;
+        }
         if (command.startsWith("delete ")) {
             return CommandType.DELETE;
         }
@@ -66,6 +72,23 @@ public class Parser {
             return CommandType.UNMARK;
         }
         return CommandType.ADD;
+    }
+
+    /**
+     * Extracts the keyword from a find command.
+     *
+     * @param command command containing a search keyword.
+     * @return the search keyword.
+     * @throws WooferException when the command does not contain a keyword.
+     */
+    public String parseFindKeyword(String command) throws WooferException {
+        String keyword = command.length() > FIND_PREFIX_LENGTH
+                ? command.substring(FIND_PREFIX_LENGTH).trim()
+                : "";
+        if (keyword.isBlank()) {
+            throw new WooferException("Please provide a keyword to find.");
+        }
+        return keyword;
     }
 
     /**

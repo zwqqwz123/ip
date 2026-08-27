@@ -1,5 +1,6 @@
 package woofer.ui;
 
+import java.util.List;
 import java.util.Scanner;
 
 import woofer.task.Task;
@@ -78,6 +79,23 @@ public class Ui {
         for (int i = 1; i <= taskList.size(); i++) {
             Task task = taskList.getTask(i);
             System.out.println(i + "." + task.getDisplayText());
+        }
+    }
+
+    /**
+     * Displays tasks that match a search keyword.
+     *
+     * @param matchingTasks tasks matching the user's keyword.
+     */
+    public void showMatchingTasks(List<Task> matchingTasks) {
+        System.out.println("Here are the matching tasks in your list:");
+        if (matchingTasks.isEmpty()) {
+            System.out.println("No matching tasks found.");
+            return;
+        }
+
+        for (int index = 0; index < matchingTasks.size(); index++) {
+            System.out.println((index + 1) + "." + matchingTasks.get(index).getDisplayText());
         }
     }
 
