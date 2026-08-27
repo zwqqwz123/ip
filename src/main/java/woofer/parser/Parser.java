@@ -20,14 +20,26 @@ public class Parser {
     private static final int UNMARK_PREFIX_LENGTH = 7;
 
     /**
+     * Creates a parser for Woofer commands.
+     */
+    public Parser() {
+    }
+
+    /**
      * The command categories understood by Woofer.
      */
     public enum CommandType {
+        /** Indicates that the user wants to exit Woofer. */
         EXIT,
+        /** Indicates that the user wants to view all tasks. */
         LIST,
+        /** Indicates that the user wants to delete a task. */
         DELETE,
+        /** Indicates that the user wants to mark a task as done. */
         MARK,
+        /** Indicates that the user wants to mark a task as not done. */
         UNMARK,
+        /** Indicates that the user wants to add a task. */
         ADD
     }
 

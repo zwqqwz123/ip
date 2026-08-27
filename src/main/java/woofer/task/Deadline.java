@@ -32,6 +32,11 @@ public class Deadline extends Task {
         return by;
     }
 
+    /**
+     * Returns the formatted deadline details for display.
+     *
+     * @return the formatted deadline date
+     */
     @Override
     protected String getDateDetails() {
         return " (by: " + by.format(DISPLAY_DATE_FORMAT) + ")";
