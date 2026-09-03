@@ -1,0 +1,48 @@
+.chat-root {
+    -fx-background-color: #f3e9de;
+    -fx-font-family: "System";
+}
+
+.scroll-pane,
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #b18a68;
+    -fx-background-radius: 1em;
+}
+
+.text-field {
+    -fx-background-color: #fffaf5;
+    -fx-background-radius: 8px;
+    -fx-border-color: #cdb39a;
+    -fx-border-radius: 8px;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 12px;
+}
+
+.text-field:focused {
+    -fx-border-color: #7a4e2d;
+}
+
+.button {
+    -fx-background-color: #7a4e2d;
+    -fx-background-radius: 8px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.button:hover {
+    -fx-background-color: #633d24;
+}
+
+.button:pressed {
+    -fx-background-color: #4e301c;
+}

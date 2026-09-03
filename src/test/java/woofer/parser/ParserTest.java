@@ -52,9 +52,31 @@ public class ParserTest {
      */
     @Test
     public void parseDeadlineCommandRejectsInvalidDate() {
-        assertThrows(
-                WooferException.class,
-                () -> parser.parseTask("deadline return book /by 02/12/2019"));
+        assertThrows(WooferException.class, () -> parser.parseTask(
+                "deadline return book /by 02/12/2019"));
+    }
+
+    /**
+     * Verifies that malformed task commands explain their complete required format.
+     */
+    @Test
+    public void malformedTaskCommandReportsRequiredFormat() {
+        WooferException exception = assertThrows(
+                WooferException.class, () -> parser.parseTask("todo"));
+
+        assertEquals("Required format: todo <description>.", exception.getMessage());
+    }
+
+    /**
+     * Verifies that malformed deadline dates explain the complete required format.
+     */
+    @Test
+    public void malformedDeadlineDateReportsRequiredFormat() {
+        WooferException exception = assertThrows(WooferException.class, () -> parser.parseTask(
+                "deadline return book /by 02/12/2019"));
+
+        assertEquals("Required format: deadline <description> /by <yyyy-MM-dd>.",
+                exception.getMessage());
     }
 
     /**
@@ -84,5 +106,16 @@ public class ParserTest {
     @Test
     public void parseTaskNumberExtractsMarkNumber() throws WooferException {
         assertEquals(3, parser.parseTaskNumber("mark 3", Parser.CommandType.MARK));
+    }
+
+    /**
+     * Verifies that a missing task number explains the complete required format.
+     */
+    @Test
+    public void missingTaskNumberReportsRequiredFormat() {
+        WooferException exception = assertThrows(WooferException.class, () ->
+                parser.parseTaskNumber("mark", Parser.CommandType.MARK));
+
+        assertEquals("Required format: mark <number>.", exception.getMessage());
     }
 }
