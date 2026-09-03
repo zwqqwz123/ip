@@ -120,22 +120,22 @@ public class Storage {
 
         boolean isDone = parseStatus(fields[1]);
         Task task = switch (fields[0]) {
-        case "T" -> {
-            requireFieldCount(fields, 3);
-            yield new Todo(requireField(fields, 2));
-        }
-        case "D" -> {
-            requireFieldCount(fields, 4);
-            yield new Deadline(requireField(fields, 2), parseDate(requireField(fields, 3)));
-        }
-        case "E" -> {
-            requireFieldCount(fields, 5);
-            yield new Event(
-                    requireField(fields, 2),
-                    parseDate(requireField(fields, 3)),
-                    parseDate(requireField(fields, 4)));
-        }
-        default -> throw new IllegalArgumentException("Unknown task type: " + fields[0]);
+            case "T" -> {
+                requireFieldCount(fields, 3);
+                yield new Todo(requireField(fields, 2));
+            }
+            case "D" -> {
+                requireFieldCount(fields, 4);
+                yield new Deadline(requireField(fields, 2), parseDate(requireField(fields, 3)));
+            }
+            case "E" -> {
+                requireFieldCount(fields, 5);
+                yield new Event(
+                        requireField(fields, 2),
+                        parseDate(requireField(fields, 3)),
+                        parseDate(requireField(fields, 4)));
+            }
+            default -> throw new IllegalArgumentException("Unknown task type: " + fields[0]);
         };
 
         if (isDone) {

@@ -159,10 +159,10 @@ public class Parser {
      */
     public int parseTaskNumber(String command, CommandType commandType) throws WooferException {
         int prefixLength = switch (commandType) {
-        case DELETE -> DELETE_PREFIX_LENGTH;
-        case MARK -> MARK_PREFIX_LENGTH;
-        case UNMARK -> UNMARK_PREFIX_LENGTH;
-        default -> throw new WooferException("That command does not contain a task number.");
+            case DELETE -> DELETE_PREFIX_LENGTH;
+            case MARK -> MARK_PREFIX_LENGTH;
+            case UNMARK -> UNMARK_PREFIX_LENGTH;
+            default -> throw new WooferException("That command does not contain a task number.");
         };
 
         try {

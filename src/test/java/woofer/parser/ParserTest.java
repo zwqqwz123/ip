@@ -52,9 +52,8 @@ public class ParserTest {
      */
     @Test
     public void parseDeadlineCommandRejectsInvalidDate() {
-        assertThrows(
-                WooferException.class,
-                () -> parser.parseTask("deadline return book /by 02/12/2019"));
+        assertThrows(WooferException.class, () -> parser.parseTask(
+                "deadline return book /by 02/12/2019"));
     }
 
     /**

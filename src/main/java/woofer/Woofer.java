@@ -87,15 +87,16 @@ public class Woofer {
     private void handleCommand(String command, Parser.CommandType commandType)
             throws WooferException {
         switch (commandType) {
-        case LIST -> ui.showTaskList(taskList);
-        case FIND -> findTasks(parser.parseFindKeyword(command));
-        case DELETE -> deleteTask(parser.parseTaskNumber(command, commandType));
-        case MARK -> markTask(parser.parseTaskNumber(command, commandType), true);
-        case UNMARK -> markTask(parser.parseTaskNumber(command, commandType), false);
-        case ADD -> addTask(parser.parseTask(command));
-        case EXIT -> {
-            // The exit command is handled before this method is called.
-        }
+            case LIST -> ui.showTaskList(taskList);
+            case FIND -> findTasks(parser.parseFindKeyword(command));
+            case DELETE -> deleteTask(parser.parseTaskNumber(command, commandType));
+            case MARK -> markTask(parser.parseTaskNumber(command, commandType), true);
+            case UNMARK -> markTask(parser.parseTaskNumber(command, commandType), false);
+            case ADD -> addTask(parser.parseTask(command));
+            case EXIT -> {
+                // The exit command is handled before this method is called.
+            }
+            default -> throw new IllegalStateException("Unsupported command type: " + commandType);
         }
     }
 
