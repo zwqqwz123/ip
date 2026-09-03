@@ -161,9 +161,8 @@ public class Parser {
             throw invalidFormat(EVENT_FORMAT);
         }
 
-        throw new WooferException("Unknown command. Try one of: " + TODO_FORMAT + ", "
-                + DEADLINE_FORMAT + ", " + EVENT_FORMAT + ", list, " + FIND_FORMAT + ", "
-                + MARK_FORMAT + ", " + UNMARK_FORMAT + ", or " + DELETE_FORMAT + ".");
+        throw invalidFormat(TODO_FORMAT, DEADLINE_FORMAT, EVENT_FORMAT, "list", FIND_FORMAT,
+                MARK_FORMAT, UNMARK_FORMAT, DELETE_FORMAT);
     }
 
     /**
@@ -218,10 +217,10 @@ public class Parser {
     /**
      * Creates a parser error that states the complete required command format.
      *
-     * @param commandFormat complete command format.
+     * @param commandFormats one or more accepted command formats.
      * @return parser error.
      */
-    private WooferException invalidFormat(String commandFormat) {
-        return new WooferException("Required format: " + commandFormat + ".");
+    private WooferException invalidFormat(String... commandFormats) {
+        return new WooferException("Required format: " + String.join(" or ", commandFormats) + ".");
     }
 }
