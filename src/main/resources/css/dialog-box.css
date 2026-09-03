@@ -1,0 +1,31 @@
+.dialog-box {
+    -fx-spacing: 10px;
+}
+
+.dialog-text {
+    -fx-background-color: #fffaf5;
+    -fx-background-radius: 14px 14px 0 14px;
+    -fx-border-color: #d6c1ad;
+    -fx-border-radius: 14px 14px 0 14px;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 14px;
+    -fx-text-fill: #4b2e1e;
+}
+
+.reply-label {
+    -fx-background-color: #ead8c7;
+    -fx-background-radius: 14px 14px 14px 0;
+    -fx-border-color: #c8a88e;
+    -fx-border-radius: 14px 14px 14px 0;
+}
+
+.avatar {
+    -fx-alignment: center;
+    -fx-background-color: #8b5e3c;
+    -fx-background-radius: 18px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-min-height: 36px;
+    -fx-min-width: 36px;
+    -fx-text-fill: white;
+}
