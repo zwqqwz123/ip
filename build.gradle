@@ -69,6 +69,14 @@ jar {
 
 shadowJar {
     archiveFileName = 'woofer.jar'
+
+    // Keep the JavaFX launcher as the executable entry point of the fat JAR.
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
+
+    // Preserve service registrations contributed by bundled dependencies.
+    mergeServiceFiles()
 }
 
 run {
