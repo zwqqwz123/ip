@@ -107,4 +107,22 @@ public class TaskList {
         }
         return tasks.remove(taskNumber - 1);
     }
+
+    /**
+     * Inserts a task at a one-based position.
+     *
+     * @param taskNumber one-based position at which to insert the task.
+     * @param task task to insert.
+     * @return true when the task was inserted, or false for an invalid position or full list.
+     */
+    public boolean insertTask(int taskNumber, Task task) {
+        assert task != null : "Task to insert must not be null";
+        if (taskNumber < 1 || taskNumber > tasks.size() + 1 || tasks.size() >= MAX_TASKS) {
+            return false;
+        }
+
+        tasks.add(taskNumber - 1, task);
+        assert tasks.size() <= MAX_TASKS : "Task list exceeded its maximum size";
+        return true;
+    }
 }

@@ -33,6 +33,7 @@ public class Parser {
     private static final String DELETE_FORMAT = "delete <number>";
     private static final String MARK_FORMAT = "mark <number>";
     private static final String UNMARK_FORMAT = "unmark <number>";
+    private static final String UNDO_FORMAT = "undo";
 
     /**
      * Creates a parser for Woofer commands.
@@ -46,6 +47,8 @@ public class Parser {
     public enum CommandType {
         /** Indicates that the user wants to exit Woofer. */
         EXIT,
+        /** Indicates that the user wants to undo the latest task-changing command. */
+        UNDO,
         /** Indicates that the user wants to view all tasks. */
         LIST,
         /** Indicates that the user wants to find tasks by keyword. */
@@ -70,6 +73,9 @@ public class Parser {
         assert command != null : "Command must not be null";
         if ("bye".equals(command)) {
             return CommandType.EXIT;
+        }
+        if ("undo".equals(command)) {
+            return CommandType.UNDO;
         }
         if ("list".equals(command)) {
             return CommandType.LIST;
@@ -174,7 +180,7 @@ public class Parser {
         }
 
         throw invalidFormat(TODO_FORMAT, DEADLINE_FORMAT, EVENT_FORMAT, "list", FIND_FORMAT,
-                MARK_FORMAT, UNMARK_FORMAT, DELETE_FORMAT);
+                MARK_FORMAT, UNMARK_FORMAT, DELETE_FORMAT, UNDO_FORMAT);
     }
 
     /**

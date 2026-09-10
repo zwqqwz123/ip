@@ -19,6 +19,7 @@ public class WooferService {
     private final Parser parser;
     private TaskList taskList;
     private boolean loadingError;
+    private UndoAction undoAction;
 
     /**
      * Creates a service and loads the saved tasks from disk.
@@ -49,6 +50,7 @@ public class WooferService {
         Parser.CommandType commandType = parser.parseCommandType(command);
         return switch (commandType) {
             case EXIT -> new Response("Bye. Hope to see you again soon!", true);
+            case UNDO -> new Response(undoTask(), false);
             case LIST -> new Response(listTasks(), false);
             case FIND -> new Response(findTasks(command), false);
             case DELETE -> new Response(deleteTask(command), false);
@@ -113,6 +115,9 @@ public class WooferService {
             throw new WooferException("The task list is full.");
         }
 
+        int addedTaskNumber = taskList.size();
+        undoAction = () -> taskList.deleteTask(addedTaskNumber);
+
         String response = "Got it. I've added this task:\n"
                 + "  " + task.getDisplayText() + "\n"
                 + "Now you have " + taskList.size() + " tasks in the list.";
@@ -131,12 +136,21 @@ public class WooferService {
         Parser.CommandType commandType = parser.parseCommandType(command);
         int taskNumber = parser.parseTaskNumber(command, commandType);
         Task task = getTaskOrThrow(taskNumber);
+        boolean previousDoneState = task.isDone();
 
         if (isDone) {
             task.markAsDone();
         } else {
             task.markAsNotDone();
         }
+
+        undoAction = () -> {
+            if (previousDoneState) {
+                task.markAsDone();
+            } else {
+                task.markAsNotDone();
+            }
+        };
 
         String response = isDone
                 ? "Nice! I've marked this task as done:\n  [X] " + task.getDescription()
@@ -155,11 +169,29 @@ public class WooferService {
         int taskNumber = parser.parseTaskNumber(command, Parser.CommandType.DELETE);
         Task task = getTaskOrThrow(taskNumber);
         taskList.deleteTask(taskNumber);
+        undoAction = () -> taskList.insertTask(taskNumber, task);
 
         String response = "Noted. I've removed this task:\n"
                 + "  " + task.getDisplayText() + "\n"
                 + "Now you have " + taskList.size() + " tasks in the list.";
         return withSavingWarning(response);
+    }
+
+    /**
+     * Reverses the latest successful task-changing command.
+     *
+     * @return a confirmation response.
+     * @throws WooferException when there is no command to undo.
+     */
+    private String undoTask() throws WooferException {
+        if (undoAction == null) {
+            throw new WooferException("Nothing to undo.");
+        }
+
+        UndoAction action = undoAction;
+        undoAction = null;
+        action.undo();
+        return withSavingWarning("Undid the previous command.");
     }
 
     /**
@@ -230,5 +262,11 @@ public class WooferService {
      * @param exits whether the command requests application exit.
      */
     public record Response(String message, boolean exits) {
+    }
+
+    /** Reverses one previously executed task-changing command. */
+    @FunctionalInterface
+    private interface UndoAction {
+        void undo();
     }
 }
