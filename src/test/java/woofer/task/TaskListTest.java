@@ -49,6 +49,22 @@ public class TaskListTest {
     }
 
     /**
+     * Verifies that a deleted task can be restored at its original position.
+     */
+    @Test
+    public void insertTaskRestoresOriginalPosition() {
+        TaskList taskList = new TaskList();
+        Task firstTask = new Todo("first task");
+        Task secondTask = new Todo("second task");
+        taskList.addTask(firstTask);
+        taskList.addTask(secondTask);
+
+        assertEquals(firstTask, taskList.deleteTask(1));
+        assertTrue(taskList.insertTask(1, firstTask));
+        assertEquals(List.of(firstTask, secondTask), taskList.getTasks());
+    }
+
+    /**
      * Verifies that task numbers outside the list return no task.
      */
     @Test

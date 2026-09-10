@@ -91,6 +91,14 @@ public class ParserTest {
     }
 
     /**
+     * Verifies that the undo command is recognized separately from task commands.
+     */
+    @Test
+    public void parseUndoCommandRecognizesUndo() {
+        assertEquals(Parser.CommandType.UNDO, parser.parseCommandType("undo"));
+    }
+
+    /**
      * Verifies that a find command without a keyword is rejected.
      */
     @Test
