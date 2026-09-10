@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 import woofer.task.Deadline;
@@ -92,10 +91,9 @@ public class Storage {
             Files.createDirectories(parentDirectory);
         }
 
-        ArrayList<String> lines = new ArrayList<>();
-        for (Task task : taskList.getTasks()) {
-            lines.add(serializeTask(task));
-        }
+        List<String> lines = taskList.getTasks().stream()
+                .map(this::serializeTask)
+                .toList();
 
         Files.write(
                 filePath,
