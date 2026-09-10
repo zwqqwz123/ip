@@ -15,10 +15,16 @@ import woofer.task.Todo;
  */
 public class Parser {
     private static final DateTimeFormatter INPUT_DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final int TODO_PREFIX_LENGTH = 5;
+    private static final int DEADLINE_PREFIX_LENGTH = 9;
+    private static final int EVENT_PREFIX_LENGTH = 6;
     private static final int DELETE_PREFIX_LENGTH = 7;
     private static final int FIND_PREFIX_LENGTH = 5;
     private static final int MARK_PREFIX_LENGTH = 5;
     private static final int UNMARK_PREFIX_LENGTH = 7;
+    private static final String BY_MARKER = " /by ";
+    private static final String FROM_MARKER = " /from ";
+    private static final String TO_MARKER = " /to ";
     private static final String TODO_FORMAT = "todo <description>";
     private static final String DEADLINE_FORMAT = "deadline <description> /by <yyyy-MM-dd>";
     private static final String EVENT_FORMAT = "event <description> /from <yyyy-MM-dd>"
@@ -57,7 +63,7 @@ public class Parser {
     /**
      * Identifies the type of a user command.
      *
-    * @param command command entered by the user.
+     * @param command command entered by the user.
      * @return the command category.
      */
     public CommandType parseCommandType(String command) {
@@ -88,7 +94,7 @@ public class Parser {
      *
      * @param command command containing a search keyword.
      * @return the search keyword.
-    * @throws WooferException when the command does not contain a keyword.
+     * @throws WooferException when the command does not contain a keyword.
      */
     public String parseFindKeyword(String command) throws WooferException {
         assert command != null : "Command must not be null";
@@ -106,12 +112,13 @@ public class Parser {
      *
      * @param command command entered by the user.
      * @return a typed task.
-    * @throws WooferException when the command is unknown or malformed.
+     * @throws WooferException when the command is unknown or malformed.
      */
     public Task parseTask(String command) throws WooferException {
         assert command != null : "Command must not be null";
         if ("todo".equals(command) || command.startsWith("todo ")) {
-            String description = command.length() > 5 ? command.substring(5).trim() : "";
+            String description = command.length() > TODO_PREFIX_LENGTH
+                    ? command.substring(TODO_PREFIX_LENGTH).trim() : "";
             if (description.isBlank()) {
                 throw invalidFormat(TODO_FORMAT);
             }
@@ -122,13 +129,14 @@ public class Parser {
         }
 
         if ("deadline".equals(command) || command.startsWith("deadline ")) {
-            String details = command.length() > 9 ? command.substring(9).trim() : "";
-            int byMarker = details.indexOf(" /by ");
+            String details = command.length() > DEADLINE_PREFIX_LENGTH
+                    ? command.substring(DEADLINE_PREFIX_LENGTH).trim() : "";
+            int byMarker = details.indexOf(BY_MARKER);
             if (byMarker < 0) {
                 throw invalidFormat(DEADLINE_FORMAT);
             }
             String description = details.substring(0, byMarker).trim();
-            String by = details.substring(byMarker + 5).trim();
+            String by = details.substring(byMarker + BY_MARKER.length()).trim();
             if (description.isBlank()) {
                 throw invalidFormat(DEADLINE_FORMAT);
             }
@@ -142,15 +150,16 @@ public class Parser {
         }
 
         if ("event".equals(command) || command.startsWith("event ")) {
-            String details = command.length() > 6 ? command.substring(6).trim() : "";
-            int fromMarker = details.indexOf(" /from ");
-            int toMarker = details.indexOf(" /to ", fromMarker + 7);
+            String details = command.length() > EVENT_PREFIX_LENGTH
+                    ? command.substring(EVENT_PREFIX_LENGTH).trim() : "";
+            int fromMarker = details.indexOf(FROM_MARKER);
+            int toMarker = details.indexOf(TO_MARKER, fromMarker + FROM_MARKER.length());
             if (fromMarker < 0 || toMarker < 0 || toMarker <= fromMarker) {
                 throw invalidFormat(EVENT_FORMAT);
             }
             String description = details.substring(0, fromMarker).trim();
-            String from = details.substring(fromMarker + 7, toMarker).trim();
-            String to = details.substring(toMarker + 5).trim();
+            String from = details.substring(fromMarker + FROM_MARKER.length(), toMarker).trim();
+            String to = details.substring(toMarker + TO_MARKER.length()).trim();
             if (description.isBlank()) {
                 throw invalidFormat(EVENT_FORMAT);
             }
@@ -174,7 +183,7 @@ public class Parser {
      * @param command command containing a task number.
      * @param commandType category of the command.
      * @return the one-based task number.
-    * @throws WooferException when the command does not contain a valid task number.
+     * @throws WooferException when the command does not contain a valid task number.
      */
     public int parseTaskNumber(String command, CommandType commandType) throws WooferException {
         assert command != null : "Command must not be null";
