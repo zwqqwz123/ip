@@ -82,10 +82,11 @@ public class Storage {
     /**
      * Saves all tasks to the data file and creates its parent directory when necessary.
      *
-     * @param taskList tasks to save.
+    * @param taskList tasks to save.
      * @throws IOException when the data file cannot be written.
      */
     public void save(TaskList taskList) throws IOException {
+        assert taskList != null : "Task list to save must not be null";
         Path parentDirectory = filePath.getParent();
         if (parentDirectory != null) {
             Files.createDirectories(parentDirectory);
@@ -109,10 +110,11 @@ public class Storage {
      * Converts one saved record into a task.
      *
      * @param line saved task record.
-     * @return the task represented by the record.
+    * @return the task represented by the record.
      * @throws IllegalArgumentException when the record is malformed.
      */
     private Task parseTask(String line) {
+        assert line != null && !line.isBlank() : "Saved task line must not be blank";
         String[] fields = line.split(FIELD_SEPARATOR_REGEX, -1);
         if (fields.length < 2) {
             throw new IllegalArgumentException("A task record has too few fields.");
@@ -209,9 +211,10 @@ public class Storage {
      * Converts a task into a pipe-delimited saved record.
      *
      * @param task task to serialize.
-     * @return the serialized task record.
+    * @return the serialized task record.
      */
     private String serializeTask(Task task) {
+        assert task != null : "Task to serialize must not be null";
         String status = task.isDone() ? DONE_STATUS : NOT_DONE_STATUS;
         if (task instanceof Deadline deadline) {
             return String.join(

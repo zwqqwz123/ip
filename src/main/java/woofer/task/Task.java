@@ -11,10 +11,13 @@ public abstract class Task {
     /**
      * Creates a new task that is initially not done.
      *
-     * @param description text describing the task.
+    * @param description text describing the task.
      * @param type type of task being created.
      */
     protected Task(String description, TaskType type) {
+        assert description != null && !description.isBlank()
+                : "Task description must not be blank";
+        assert type != null : "Task type must not be null";
         this.description = description;
         this.type = type;
         this.isDone = false;
@@ -68,11 +71,13 @@ public abstract class Task {
     /**
      * Formats this task for the task list.
      *
-     * @return the task type, completion status, description, and date details.
+    * @return the task type, completion status, description, and date details.
      */
     public String getDisplayText() {
+        String dateDetails = getDateDetails();
+        assert dateDetails != null : "Task date details must not be null";
         return "[" + getTypeIcon() + "][" + getStatusIcon() + "] "
-                + description + getDateDetails();
+                + description + dateDetails;
     }
 
     /**

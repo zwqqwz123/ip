@@ -31,14 +31,16 @@ public class TaskList {
      * Adds a task of any supported type to the list.
      *
      * @param task task to add.
-     * @return true when the task was added, or false when the list is full.
+    * @return true when the task was added, or false when the list is full.
      */
     public boolean addTask(Task task) {
+        assert task != null : "Task to add must not be null";
         if (tasks.size() >= MAX_TASKS) {
             return false;
         }
 
         tasks.add(task);
+        assert tasks.size() <= MAX_TASKS : "Task list exceeded its maximum size";
         return true;
     }
 

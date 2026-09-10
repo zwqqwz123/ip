@@ -57,10 +57,11 @@ public class Parser {
     /**
      * Identifies the type of a user command.
      *
-     * @param command command entered by the user.
+    * @param command command entered by the user.
      * @return the command category.
      */
     public CommandType parseCommandType(String command) {
+        assert command != null : "Command must not be null";
         if ("bye".equals(command)) {
             return CommandType.EXIT;
         }
@@ -87,9 +88,10 @@ public class Parser {
      *
      * @param command command containing a search keyword.
      * @return the search keyword.
-     * @throws WooferException when the command does not contain a keyword.
+    * @throws WooferException when the command does not contain a keyword.
      */
     public String parseFindKeyword(String command) throws WooferException {
+        assert command != null : "Command must not be null";
         String keyword = command.length() > FIND_PREFIX_LENGTH
                 ? command.substring(FIND_PREFIX_LENGTH).trim()
                 : "";
@@ -104,9 +106,10 @@ public class Parser {
      *
      * @param command command entered by the user.
      * @return a typed task.
-     * @throws WooferException when the command is unknown or malformed.
+    * @throws WooferException when the command is unknown or malformed.
      */
     public Task parseTask(String command) throws WooferException {
+        assert command != null : "Command must not be null";
         if ("todo".equals(command) || command.startsWith("todo ")) {
             String description = command.length() > 5 ? command.substring(5).trim() : "";
             if (description.isBlank()) {
@@ -171,9 +174,11 @@ public class Parser {
      * @param command command containing a task number.
      * @param commandType category of the command.
      * @return the one-based task number.
-     * @throws WooferException when the command does not contain a valid task number.
+    * @throws WooferException when the command does not contain a valid task number.
      */
     public int parseTaskNumber(String command, CommandType commandType) throws WooferException {
+        assert command != null : "Command must not be null";
+        assert commandType != null : "Command type must not be null";
         int prefixLength = switch (commandType) {
             case DELETE -> DELETE_PREFIX_LENGTH;
             case MARK -> MARK_PREFIX_LENGTH;
