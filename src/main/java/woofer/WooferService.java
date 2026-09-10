@@ -128,10 +128,7 @@ public class WooferService {
     private String markTask(String command, boolean isDone) throws WooferException {
         Parser.CommandType commandType = parser.parseCommandType(command);
         int taskNumber = parser.parseTaskNumber(command, commandType);
-        Task task = taskList.getTask(taskNumber);
-        if (task == null) {
-            throw new WooferException("That task does not exist.");
-        }
+        Task task = getTaskOrThrow(taskNumber);
 
         if (isDone) {
             task.markAsDone();
@@ -154,15 +151,28 @@ public class WooferService {
      */
     private String deleteTask(String command) throws WooferException {
         int taskNumber = parser.parseTaskNumber(command, Parser.CommandType.DELETE);
-        Task task = taskList.deleteTask(taskNumber);
-        if (task == null) {
-            throw new WooferException("That task does not exist.");
-        }
+        Task task = getTaskOrThrow(taskNumber);
+        taskList.deleteTask(taskNumber);
 
         String response = "Noted. I've removed this task:\n"
                 + "  " + task.getDisplayText() + "\n"
                 + "Now you have " + taskList.size() + " tasks in the list.";
         return withSavingWarning(response);
+    }
+
+    /**
+     * Returns a task or reports the user-facing error for an invalid number.
+     *
+     * @param taskNumber one-based task number.
+     * @return the task at the requested position.
+     * @throws WooferException when the task number is outside the list.
+     */
+    private Task getTaskOrThrow(int taskNumber) throws WooferException {
+        Task task = taskList.getTask(taskNumber);
+        if (task == null) {
+            throw new WooferException("That task does not exist.");
+        }
+        return task;
     }
 
     /**
