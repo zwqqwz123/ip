@@ -18,10 +18,11 @@ public class Event extends Task {
      *
      * @param description text describing the event.
      * @param from date when the event starts.
-     * @param to date when the event ends.
+    * @param to date when the event ends.
      */
     public Event(String description, LocalDate from, LocalDate to) {
         super(description, TaskType.EVENT);
+        assert from != null && to != null : "Event dates must not be null";
         this.from = from;
         this.to = to;
     }

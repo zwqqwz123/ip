@@ -16,10 +16,11 @@ public class Deadline extends Task {
      * Creates a new deadline task.
      *
      * @param description text describing the task.
-     * @param by date by which the task should be completed.
+    * @param by date by which the task should be completed.
      */
     public Deadline(String description, LocalDate by) {
         super(description, TaskType.DEADLINE);
+        assert by != null : "Deadline date must not be null";
         this.by = by;
     }
 
