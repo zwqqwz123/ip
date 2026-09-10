@@ -2,6 +2,8 @@ package woofer;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import woofer.exception.WooferException;
 import woofer.parser.Parser;
@@ -211,18 +213,14 @@ public class WooferService {
      * @return the formatted task output.
      */
     private String formatTasks(String heading, List<Task> tasks, String emptyMessage) {
-        StringBuilder response = new StringBuilder(heading);
         if (tasks.isEmpty()) {
-            return response.append('\n').append(emptyMessage).toString();
+            return heading + "\n" + emptyMessage;
         }
 
-        for (int index = 0; index < tasks.size(); index++) {
-            response.append('\n')
-                    .append(index + 1)
-                    .append('.')
-                    .append(tasks.get(index).getDisplayText());
-        }
-        return response.toString();
+        String numberedTasks = IntStream.range(0, tasks.size())
+                .mapToObj(index -> (index + 1) + "." + tasks.get(index).getDisplayText())
+                .collect(Collectors.joining("\n"));
+        return heading + "\n" + numberedTasks;
     }
 
     /**
