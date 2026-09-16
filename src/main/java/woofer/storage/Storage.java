@@ -3,8 +3,9 @@ package woofer.storage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -26,6 +27,8 @@ public class Storage {
     private static final String NOT_DONE_STATUS = "0";
 
     private final Path filePath;
+    /** Prevents a failed load from being followed by an overwrite of the unreadable original. */
+    private boolean savingBlocked;
 
     /**
      * Creates storage using {@code ./data/woofer.txt} as the data file.
@@ -39,69 +42,74 @@ public class Storage {
      *
      * @param filePath path of the data file.
      */
-    Storage(Path filePath) {
+    public Storage(Path filePath) {
         this.filePath = filePath;
     }
 
     /**
-     * Loads saved tasks from the data file.
+     * Loads all records, treating only a missing file as a new task list.
      *
-     * <p>A missing data file is treated as an empty task list. Invalid records are skipped so
-     * that valid records can still be loaded.</p>
+     * <p>If any record is invalid, saving is blocked to protect the original file. Repair the
+     * file and restart Woofer to resume saving.</p>
      *
-     * @return the tasks loaded from the data file.
-     * @throws IOException when the data file cannot be read.
+     * @return the loaded tasks.
+     * @throws IOException when reading fails, a record is invalid, or the task limit is exceeded.
      */
     public TaskList load() throws IOException {
+        savingBlocked = true;
         TaskList taskList = new TaskList();
-        if (!Files.exists(filePath)) {
+        List<String> lines;
+        try {
+            lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+        } catch (NoSuchFileException exception) {
+            savingBlocked = false;
             return taskList;
         }
-
-        List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
         for (int index = 0; index < lines.size(); index++) {
             String line = lines.get(index);
             if (line.isBlank()) {
                 continue;
             }
-
             try {
                 Task task = parseTask(line);
                 if (!taskList.addTask(task)) {
-                    System.out.println("Warning: Saved task limit reached; remaining tasks were skipped.");
-                    break;
+                    throw new IllegalArgumentException("Saved task limit exceeded.");
                 }
             } catch (IllegalArgumentException exception) {
-                System.out.println("Warning: Skipping invalid saved task on line " + (index + 1) + ".");
+                throw new IOException("Invalid saved task on line " + (index + 1) + ".", exception);
             }
         }
+        savingBlocked = false;
         return taskList;
     }
 
     /**
-     * Saves all tasks to the data file and creates its parent directory when necessary.
+     * Writes a complete temporary file before atomically replacing the saved file.
      *
-    * @param taskList tasks to save.
-     * @throws IOException when the data file cannot be written.
+     * <p>If atomic replacement is unsupported or fails, the original is left untouched.</p>
+     *
+     * @param taskList tasks to save.
+     * @throws IOException when saving is blocked or the file cannot be replaced safely.
      */
     public void save(TaskList taskList) throws IOException {
         assert taskList != null : "Task list to save must not be null";
-        Path parentDirectory = filePath.getParent();
-        if (parentDirectory != null) {
-            Files.createDirectories(parentDirectory);
+        if (savingBlocked) {
+            throw new IOException("Saving is disabled because the original file could not be loaded.");
         }
-
+        Path target = filePath.toAbsolutePath();
+        Path parentDirectory = target.getParent();
+        Files.createDirectories(parentDirectory);
         List<String> lines = taskList.getTasks().stream()
                 .map(this::serializeTask)
                 .toList();
-
-        Files.write(
-                filePath,
-                lines,
-                StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.WRITE);
+        Path temporaryFile = Files.createTempFile(parentDirectory, "woofer-", ".tmp");
+        try {
+            Files.write(temporaryFile, lines, StandardCharsets.UTF_8);
+            Files.move(temporaryFile, target, StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
+        } finally {
+            Files.deleteIfExists(temporaryFile);
+        }
     }
 
     /**

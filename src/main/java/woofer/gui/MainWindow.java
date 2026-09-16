@@ -52,8 +52,7 @@ public class MainWindow extends AnchorPane {
     public void setWooferService(WooferService service) {
         wooferService = service;
         if (service.hasLoadingError()) {
-            appendErrorMessage("Could not load saved tasks. "
-                    + "Starting with an empty list.");
+            appendErrorMessage(service.getLoadingWarning());
         }
         Platform.runLater(userInput::requestFocus);
     }
@@ -73,7 +72,11 @@ public class MainWindow extends AnchorPane {
         try {
             WooferService.Response response = wooferService.execute(input);
             userInput.clear();
-            appendWooferMessage(response.message());
+            if (response.warning()) {
+                appendErrorMessage(response.message());
+            } else {
+                appendWooferMessage(response.message());
+            }
             if (response.exits()) {
                 disableInput();
             }

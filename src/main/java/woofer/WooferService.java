@@ -20,12 +20,23 @@ public class WooferService {
     private TaskList taskList;
     private boolean loadingError;
     private UndoAction undoAction;
+    /** Whether the latest save failed, so interfaces can highlight its warning. */
+    private boolean savingError;
 
     /**
      * Creates a service and loads the saved tasks from disk.
      */
     public WooferService() {
-        storage = new Storage();
+        this(new Storage());
+    }
+
+    /**
+     * Creates a service with a chosen storage location, including isolated files for tests.
+     *
+     * @param storage storage used to load and save tasks.
+     */
+    public WooferService(Storage storage) {
+        this.storage = storage;
         parser = new Parser();
         taskList = loadTaskList();
     }
@@ -40,6 +51,17 @@ public class WooferService {
     }
 
     /**
+     * Explains startup failure and how to protect and recover the saved tasks.
+     *
+     * @return warning shown by both interfaces when loading fails.
+     */
+    public String getLoadingWarning() {
+        return "Could not load saved tasks. Check data/woofer.txt for invalid records or access problems. "
+                + "This session starts empty; saving is disabled to protect the original file. "
+                + "Repair the file or its permissions and restart Woofer.";
+    }
+
+    /**
      * Processes one command and returns the text that should be shown to the user.
      *
      * @param command command entered by the user.
@@ -47,16 +69,17 @@ public class WooferService {
      * @throws WooferException when the command is invalid.
      */
     public Response execute(String command) throws WooferException {
+        command = parser.normalizeCommand(command);
         Parser.CommandType commandType = parser.parseCommandType(command);
         return switch (commandType) {
             case EXIT -> new Response("Woof woof! Time for a nap. See you on our next adventure!", true);
-            case UNDO -> new Response(undoTask(), false);
+            case UNDO -> taskResponse(undoTask());
             case LIST -> new Response(listTasks(), false);
             case FIND -> new Response(findTasks(command), false);
-            case DELETE -> new Response(deleteTask(command), false);
-            case MARK -> new Response(markTask(command, true), false);
-            case UNMARK -> new Response(markTask(command, false), false);
-            case ADD -> new Response(addTask(command), false);
+            case DELETE -> taskResponse(deleteTask(command));
+            case MARK -> taskResponse(markTask(command, true));
+            case UNMARK -> taskResponse(markTask(command, false));
+            case ADD -> taskResponse(addTask(command));
             default -> throw new IllegalStateException("Unsupported command type: " + commandType);
         };
     }
@@ -69,7 +92,7 @@ public class WooferService {
     private TaskList loadTaskList() {
         try {
             return storage.load();
-        } catch (IOException exception) {
+        } catch (IOException | SecurityException exception) {
             loadingError = true;
             return new TaskList();
         }
@@ -216,10 +239,12 @@ public class WooferService {
      * @return the response, possibly with a saving warning.
      */
     private String withSavingWarning(String response) {
-        if (saveTaskList()) {
+        savingError = !saveTaskList();
+        if (!savingError) {
             return response;
         }
-        return response + "\nWarning: Could not save your tasks.";
+        return response + "\nWarning: Could not save your tasks. Changes are only in memory. "
+                + "Check the data file and folder permissions before closing Woofer.";
     }
 
     /**
@@ -231,7 +256,7 @@ public class WooferService {
         try {
             storage.save(taskList);
             return true;
-        } catch (IOException exception) {
+        } catch (IOException | SecurityException exception) {
             return false;
         }
     }
@@ -260,8 +285,28 @@ public class WooferService {
      *
      * @param message text to show in the conversation.
      * @param exits whether the command requests application exit.
+     * @param warning whether a save failure needs attention.
      */
-    public record Response(String message, boolean exits) {
+    public record Response(String message, boolean exits, boolean warning) {
+        /**
+         * Creates an ordinary response without a storage warning.
+         *
+         * @param message response text.
+         * @param exits whether to stop accepting commands.
+         */
+        public Response(String message, boolean exits) {
+            this(message, exits, false);
+        }
+    }
+
+    /**
+     * Attaches the latest saving status to a task-changing response.
+     *
+     * @param message result of the task change and save attempt.
+     * @return response with explicit warning status for the GUI.
+     */
+    private Response taskResponse(String message) {
+        return new Response(message, false, savingError);
     }
 
     /** Reverses one previously executed task-changing command. */

@@ -29,3 +29,14 @@ ________________________________________________________________________________
    ```
 
 **Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
+
+## Input errors and file recovery
+
+- Leading/trailing spaces and repeated spaces or tabs are accepted and normalized to single spaces.
+- Commands take one line. Task descriptions cannot contain `|`, which separates fields in the save file.
+- `list`, `undo`, and `bye` do not accept extra arguments. Task numbers must be positive whole numbers from `list`.
+- Dates must be real calendar dates in `yyyy-MM-dd` format. Events must end after their start date; same-day events are rejected.
+- Deadline/event date markers must appear exactly once in the required order. Invalid commands leave tasks and undo history unchanged.
+- Identical tasks remain allowed, since repeated chores can be intentional.
+- A missing `data/woofer.txt` is normal on first use. An unreadable or malformed file produces a startup warning and disables saving for that session, protecting the original file. Check the file's records and permissions, repair it, then restart Woofer. Tasks entered during this session are only in memory.
+- Saves use a temporary file and atomic replacement. If writing or atomic replacement fails, Woofer warns that changes are only in memory. Resolve the file/folder problem and make another task change to retry saving before closing the app.

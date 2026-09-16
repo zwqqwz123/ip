@@ -3,6 +3,7 @@ package woofer.parser;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 import woofer.exception.WooferException;
 import woofer.task.Deadline;
@@ -68,9 +69,14 @@ public class Parser {
      *
      * @param command command entered by the user.
      * @return the command category.
+     * @throws WooferException when the command is empty or has unexpected arguments.
      */
-    public CommandType parseCommandType(String command) {
-        assert command != null : "Command must not be null";
+    public CommandType parseCommandType(String command) throws WooferException {
+        command = normalizeCommand(command);
+        String verb = command.split(" ", 2)[0];
+        if (List.of("bye", "undo", "list").contains(verb) && !command.equals(verb)) {
+            throw invalidFormat(verb);
+        }
         if ("bye".equals(command)) {
             return CommandType.EXIT;
         }
@@ -103,7 +109,7 @@ public class Parser {
      * @throws WooferException when the command does not contain a keyword.
      */
     public String parseFindKeyword(String command) throws WooferException {
-        assert command != null : "Command must not be null";
+        command = normalizeCommand(command);
         String keyword = command.length() > FIND_PREFIX_LENGTH
                 ? command.substring(FIND_PREFIX_LENGTH).trim()
                 : "";
@@ -121,7 +127,10 @@ public class Parser {
      * @throws WooferException when the command is unknown or malformed.
      */
     public Task parseTask(String command) throws WooferException {
-        assert command != null : "Command must not be null";
+        command = normalizeCommand(command);
+        if (command.contains("|")) {
+            throw new WooferException("Task descriptions cannot contain | because it separates saved fields.");
+        }
         if ("todo".equals(command) || command.startsWith("todo ")) {
             String description = command.length() > TODO_PREFIX_LENGTH
                     ? command.substring(TODO_PREFIX_LENGTH).trim() : "";
@@ -137,6 +146,7 @@ public class Parser {
         if ("deadline".equals(command) || command.startsWith("deadline ")) {
             String details = command.length() > DEADLINE_PREFIX_LENGTH
                     ? command.substring(DEADLINE_PREFIX_LENGTH).trim() : "";
+            requireMarkers(details, List.of("/by"), DEADLINE_FORMAT);
             int byMarker = details.indexOf(BY_MARKER);
             if (byMarker < 0) {
                 throw invalidFormat(DEADLINE_FORMAT);
@@ -158,6 +168,7 @@ public class Parser {
         if ("event".equals(command) || command.startsWith("event ")) {
             String details = command.length() > EVENT_PREFIX_LENGTH
                     ? command.substring(EVENT_PREFIX_LENGTH).trim() : "";
+            requireMarkers(details, List.of("/from", "/to"), EVENT_FORMAT);
             int fromMarker = details.indexOf(FROM_MARKER);
             int toMarker = details.indexOf(TO_MARKER, fromMarker + FROM_MARKER.length());
             if (fromMarker < 0 || toMarker < 0 || toMarker <= fromMarker) {
@@ -172,15 +183,19 @@ public class Parser {
             if (from.isBlank() || to.isBlank()) {
                 throw invalidFormat(EVENT_FORMAT);
             }
-            return new Event(description, parseDate(from, EVENT_FORMAT),
-                    parseDate(to, EVENT_FORMAT));
+            LocalDate start = parseDate(from, EVENT_FORMAT);
+            LocalDate end = parseDate(to, EVENT_FORMAT);
+            if (!end.isAfter(start)) {
+                throw new WooferException("The event end date must be after its start date.");
+            }
+            return new Event(description, start, end);
         }
         if (command.startsWith("event")) {
             throw invalidFormat(EVENT_FORMAT);
         }
 
         throw invalidFormat(TODO_FORMAT, DEADLINE_FORMAT, EVENT_FORMAT, "list", FIND_FORMAT,
-                MARK_FORMAT, UNMARK_FORMAT, DELETE_FORMAT, UNDO_FORMAT);
+                MARK_FORMAT, UNMARK_FORMAT, DELETE_FORMAT, UNDO_FORMAT, "bye");
     }
 
     /**
@@ -192,7 +207,7 @@ public class Parser {
      * @throws WooferException when the command does not contain a valid task number.
      */
     public int parseTaskNumber(String command, CommandType commandType) throws WooferException {
-        assert command != null : "Command must not be null";
+        command = normalizeCommand(command);
         assert commandType != null : "Command type must not be null";
         int prefixLength = switch (commandType) {
             case DELETE -> DELETE_PREFIX_LENGTH;
@@ -212,7 +227,15 @@ public class Parser {
         }
 
         try {
-            return Integer.parseInt(command.substring(prefixLength).trim());
+            String number = command.substring(prefixLength).trim();
+            if (!number.matches("[0-9]+")) {
+                throw invalidFormat(commandFormat);
+            }
+            int taskNumber = Integer.parseInt(number);
+            if (taskNumber < 1) {
+                throw new WooferException("Task numbers start at 1. Use list to see your tasks.");
+            }
+            return taskNumber;
         } catch (NumberFormatException exception) {
             throw invalidFormat(commandFormat);
         }
@@ -231,6 +254,40 @@ public class Parser {
             return LocalDate.parse(date, INPUT_DATE_FORMAT);
         } catch (DateTimeParseException exception) {
             throw invalidFormat(commandFormat);
+        }
+    }
+
+    /**
+     * Normalizes spaces and tabs consistently for both interfaces and rejects multiline input.
+     *
+     * @param command raw command.
+     * @return a trimmed command with single spaces.
+     * @throws WooferException when input is missing or contains unsupported control characters.
+     */
+    public String normalizeCommand(String command) throws WooferException {
+        if (command == null || command.isBlank()) {
+            throw new WooferException("Give me a command, buddy! Try list or todo walk the dog.");
+        }
+        if (command.chars().anyMatch(character -> Character.isISOControl(character) && character != '\t')) {
+            throw new WooferException("Please enter one command on a single line without control characters.");
+        }
+        return command.strip().replaceAll("[ \t]+", " ");
+    }
+
+    /**
+     * Requires exactly the expected date markers in order, including markers with missing values.
+     *
+     * @param details task description and date parameters.
+     * @param expected expected marker sequence.
+     * @param format command syntax to report on failure.
+     * @throws WooferException when a date marker is repeated, misplaced, or unexpected.
+     */
+    private void requireMarkers(String details, List<String> expected, String format) throws WooferException {
+        List<String> markers = List.of(details.split(" ")).stream()
+                .filter(token -> List.of("/by", "/from", "/to").contains(token))
+                .toList();
+        if (!markers.equals(expected)) {
+            throw invalidFormat(format);
         }
     }
 

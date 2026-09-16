@@ -33,7 +33,7 @@ public class Woofer {
     public void run() {
         ui.showWelcome();
         if (service.hasLoadingError()) {
-            ui.showLoadingError();
+            ui.showError(service.getLoadingWarning());
         }
 
         while (ui.hasNextCommand()) {

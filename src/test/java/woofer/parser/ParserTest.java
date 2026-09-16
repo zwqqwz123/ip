@@ -92,9 +92,11 @@ public class ParserTest {
 
     /**
      * Verifies that the undo command is recognized separately from task commands.
+     *
+     * @throws WooferException when the valid command cannot be parsed.
      */
     @Test
-    public void parseUndoCommandRecognizesUndo() {
+    public void parseUndoCommandRecognizesUndo() throws WooferException {
         assertEquals(Parser.CommandType.UNDO, parser.parseCommandType("undo"));
     }
 
@@ -125,5 +127,49 @@ public class ParserTest {
                 parser.parseTaskNumber("mark", Parser.CommandType.MARK));
 
         assertEquals("Required format: mark <number>.", exception.getMessage());
+    }
+
+    /**
+     * Checks spaces and tabs across command kinds and date separators.
+     *
+     * @throws WooferException when valid input is rejected.
+     */
+    @Test
+    public void extraWhitespaceIsAccepted() throws WooferException {
+        assertEquals(Parser.CommandType.LIST, parser.parseCommandType("  list  "));
+        assertEquals("walk dog", parser.parseTask("  todo\t walk   dog ").getDescription());
+        assertEquals(2, parser.parseTaskNumber(" mark\t 2 ", Parser.CommandType.MARK));
+        assertEquals("walk dog", parser.parseFindKeyword(" find  walk   dog "));
+        assertInstanceOf(Deadline.class, parser.parseTask("deadline task   /by\t 2026-09-16"));
+    }
+
+    /** Verifies that invalid records cannot be introduced through task commands. */
+    @Test
+    public void unsafeAndMalformedTasksAreRejected() {
+        String[] commands = {
+            "todo a|b", "todo first\nsecond", "todo bad\u0000text",
+            "deadline test /by 2026-02-30", "deadline test /by 2025-02-29",
+            "deadline test /by 2026-09-16 /by 2026-09-17",
+            "event test /from 2026-09-16 /to 2026-09-16",
+            "event test /from 2026-09-17 /to 2026-09-16",
+            "event test /from extra /from 2026-09-16 /to 2026-09-17",
+            "event test /to extra /from 2026-09-16 /to 2026-09-17",
+            "event test /from 2026-09-16 /to", "deadline /by 2026-09-16"
+        };
+        for (String command : commands) {
+            assertThrows(WooferException.class, () -> parser.parseTask(command), command);
+        }
+    }
+
+    /** Verifies that empty commands and unwanted arguments produce user-facing errors. */
+    @Test
+    public void invalidCommandsAreRejected() {
+        for (String command : new String[]{null, "", "  ", "list extra", "undo 1", "bye now"}) {
+            assertThrows(WooferException.class, () -> parser.parseCommandType(command));
+        }
+        for (String number : new String[]{"0", "-1", "+1", "1.5", "1 2", "9999999999999999"}) {
+            assertThrows(WooferException.class, () ->
+                    parser.parseTaskNumber("delete " + number, Parser.CommandType.DELETE));
+        }
     }
 }
