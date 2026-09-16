@@ -36,7 +36,7 @@ public class Main extends Application {
             MainWindow controller = fxmlLoader.getController();
             controller.setWooferService(new WooferService());
 
-            stage.setTitle("Woofer");
+            stage.setTitle("Woofer — Your task buddy");
             stage.setMinWidth(400.0);
             stage.setMinHeight(420.0);
             stage.setScene(scene);

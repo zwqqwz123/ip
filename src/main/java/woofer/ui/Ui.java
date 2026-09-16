@@ -31,8 +31,8 @@ public class Ui {
     public void showWelcome() {
         System.out.println(SEPARATOR);
         System.out.println(BANNER);
-        System.out.println("Hello! I'm Woofer.");
-        System.out.println("What can I do for you?");
+        System.out.println("Woof! I'm Woofer, your tail-wagging task buddy.");
+        System.out.println("Let's tackle your tasks, one paw at a time!");
         showLine();
     }
 
@@ -74,7 +74,7 @@ public class Ui {
      * Displays Woofer's exit message.
      */
     public void showBye() {
-        System.out.println("Bye. Hope to see you again soon!");
+        System.out.println("Woof woof! Time for a nap. See you on our next adventure!");
         showLine();
     }
 
@@ -84,7 +84,7 @@ public class Ui {
      * @param taskList list of tasks to display.
      */
     public void showTaskList(TaskList taskList) {
-        System.out.println("Here are the tasks in your list:");
+        System.out.println("Woof! I fetched your task list:");
         for (int i = 1; i <= taskList.size(); i++) {
             Task task = taskList.getTask(i);
             System.out.println(i + "." + task.getDisplayText());
@@ -97,9 +97,9 @@ public class Ui {
      * @param matchingTasks tasks matching the user's keyword.
      */
     public void showMatchingTasks(List<Task> matchingTasks) {
-        System.out.println("Here are the matching tasks in your list:");
+        System.out.println("Sniff sniff! Here are the matching tasks:");
         if (matchingTasks.isEmpty()) {
-            System.out.println("No matching tasks found.");
+            System.out.println("No matching tasks sniffed out. Try another keyword!");
             return;
         }
 
@@ -115,7 +115,7 @@ public class Ui {
      * @param taskCount number of tasks after adding.
      */
     public void showAddedTask(Task task, int taskCount) {
-        System.out.println("Got it. I've added this task:");
+        System.out.println("Woof! I'll keep an eye on this task:");
         System.out.println("  " + task.getDisplayText());
         System.out.println("Now you have " + taskCount + " tasks in the list.");
     }
@@ -128,10 +128,10 @@ public class Ui {
      */
     public void showMarkedTask(Task task, boolean isDone) {
         if (isDone) {
-            System.out.println("Nice! I've marked this task as done:");
+            System.out.println("High paw! This task is done:");
             System.out.println("  [X] " + task.getDescription());
         } else {
-            System.out.println("OK, I've marked this task as not done yet:");
+            System.out.println("Back on the trail! This task is not done yet:");
             System.out.println("  [ ] " + task.getDescription());
         }
     }
@@ -143,7 +143,7 @@ public class Ui {
      * @param remainingTaskCount number of tasks after deletion.
      */
     public void showDeletedTask(Task task, int remainingTaskCount) {
-        System.out.println("Noted. I've removed this task:");
+        System.out.println("All clear! I've removed this task:");
         System.out.println("  " + task.getDisplayText());
         System.out.println("Now you have " + remainingTaskCount + " tasks in the list.");
     }
@@ -154,7 +154,7 @@ public class Ui {
      * @param message error message to display.
      */
     public void showError(String message) {
-        System.out.println("OOPS!!! " + message);
+        System.out.println("Oops, a little tangle in the leash! " + message);
     }
 
     /**

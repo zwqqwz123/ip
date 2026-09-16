@@ -1,5 +1,5 @@
 .chat-root {
-    -fx-background-color: #f8f4ee;
+    -fx-background-color: #fff8e9;
     -fx-font-family: "System";
     -fx-font-size: 14px;
     -fx-text-fill: #3f3026;
@@ -7,8 +7,12 @@
 
 .chat-header {
     -fx-padding: 16px 20px 14px 20px;
-    -fx-background-color: #fffdf9;
+    -fx-background-color: #ffe7ad;
     -fx-border-color: transparent transparent #e3d8cb transparent;
+}
+
+.paw-icon {
+    -fx-fill: #7a4e2d;
 }
 
 .app-title {
