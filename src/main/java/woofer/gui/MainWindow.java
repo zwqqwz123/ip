@@ -40,7 +40,8 @@ public class MainWindow extends AnchorPane {
     private void initialize() {
         dialogContainer.heightProperty().addListener((observable, oldHeight, newHeight) ->
                 scrollToBottom());
-        appendWooferMessage("Hello! I'm Woofer.\nWhat can I do for you?");
+        appendWooferMessage("Woof! I'm Woofer, your tail-wagging task buddy.\n"
+                + "Let's tackle your tasks, one paw at a time!");
     }
 
     /**
@@ -77,7 +78,7 @@ public class MainWindow extends AnchorPane {
                 disableInput();
             }
         } catch (WooferException exception) {
-            appendErrorMessage(exception.getMessage());
+            appendErrorMessage("Oops, a little tangle in the leash!\n" + exception.getMessage());
         }
         if (!userInput.isDisabled()) {
             userInput.requestFocus();
@@ -131,6 +132,6 @@ public class MainWindow extends AnchorPane {
     private void disableInput() {
         userInput.setDisable(true);
         sendButton.setDisable(true);
-        userInput.setPromptText("Woofer has stopped. Close the window to exit.");
+        userInput.setPromptText("Woofer is napping. Close the window to exit.");
     }
 }

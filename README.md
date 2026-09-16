@@ -1,6 +1,6 @@
-# Woofer project template
+# Woofer — Your tail-wagging task buddy
 
-This is a project template for a greenfield Java project. Its chatbot is named _Woofer_. Given below are instructions on how to use it.
+Woofer is a cheerful pet-dog chatbot that helps you keep track of tasks. It fetches your list, sniffs out matching tasks, and celebrates each completed task with a high paw. Its GUI pairs a paw badge with biscuit-yellow and warm brown colours. Commands and date formats stay the same.
 
 ## Setting up in Intellij
 
@@ -21,10 +21,10 @@ __        __   ____   ____   _____   _____   ____
  \ \ /\ / /  | |  | | |  | || |_    |  _|   | |_) |
   \ V  V /   | |__| | |__| ||  _|   | |___  |  _ <
    \_/\_/     \____/ \____/ |_|     |_____| |_| \_\
-Hello! I'm Woofer.
-What can I do for you today?
+Woof! I'm Woofer, your tail-wagging task buddy.
+Let's tackle your tasks, one paw at a time!
 ____________________________________________________________________________________________________
-Bye. Hope to see you again soon! Woof!
+Woof woof! Time for a nap. See you on our next adventure!
 ____________________________________________________________________________________________________
    ```
 

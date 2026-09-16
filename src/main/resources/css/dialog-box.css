@@ -19,8 +19,8 @@
 }
 
 .woofer-message .dialog-text {
-    -fx-background-color: #fffdf9;
-    -fx-border-color: #e3d8cb;
+    -fx-background-color: #fff3d4;
+    -fx-border-color: #dfc48e;
 }
 
 .error-message .dialog-text {

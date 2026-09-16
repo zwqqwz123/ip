@@ -49,7 +49,7 @@ public class WooferService {
     public Response execute(String command) throws WooferException {
         Parser.CommandType commandType = parser.parseCommandType(command);
         return switch (commandType) {
-            case EXIT -> new Response("Bye. Hope to see you again soon!", true);
+            case EXIT -> new Response("Woof woof! Time for a nap. See you on our next adventure!", true);
             case UNDO -> new Response(undoTask(), false);
             case LIST -> new Response(listTasks(), false);
             case FIND -> new Response(findTasks(command), false);
@@ -82,9 +82,9 @@ public class WooferService {
      */
     private String listTasks() {
         return formatTasks(
-                "Here are the tasks in your list (" + taskList.size() + "):",
+                "Woof! I fetched your task list (" + taskList.size() + "):",
                 taskList.getTasks(),
-                "There are no tasks in your list.");
+                "Nothing on the list yet! Try: todo walk the dog");
     }
 
     /**
@@ -97,9 +97,9 @@ public class WooferService {
     private String findTasks(String command) throws WooferException {
         String keyword = parser.parseFindKeyword(command);
         return formatTasks(
-                "Here are the matching tasks in your list:",
+                "Sniff sniff! Here are the matching tasks:",
                 taskList.findTasks(keyword),
-                "No matching tasks found.");
+                "No matching tasks sniffed out. Try another keyword!");
     }
 
     /**
@@ -112,13 +112,13 @@ public class WooferService {
     private String addTask(String command) throws WooferException {
         Task task = parser.parseTask(command);
         if (!taskList.addTask(task)) {
-            throw new WooferException("The task list is full.");
+            throw new WooferException("My task basket is full! Delete a task before adding another.");
         }
 
         int addedTaskNumber = taskList.size();
         undoAction = () -> taskList.deleteTask(addedTaskNumber);
 
-        String response = "Got it. I've added this task:\n"
+        String response = "Woof! I'll keep an eye on this task:\n"
                 + "  " + task.getDisplayText() + "\n"
                 + "Now you have " + taskList.size() + " tasks in the list.";
         return withSavingWarning(response);
@@ -153,8 +153,8 @@ public class WooferService {
         };
 
         String response = isDone
-                ? "Nice! I've marked this task as done:\n  [X] " + task.getDescription()
-                : "OK, I've marked this task as not done yet:\n  [ ] " + task.getDescription();
+                ? "High paw! This task is done:\n  [X] " + task.getDescription()
+                : "Back on the trail! This task is not done yet:\n  [ ] " + task.getDescription();
         return withSavingWarning(response);
     }
 
@@ -171,7 +171,7 @@ public class WooferService {
         taskList.deleteTask(taskNumber);
         undoAction = () -> taskList.insertTask(taskNumber, task);
 
-        String response = "Noted. I've removed this task:\n"
+        String response = "All clear! I've removed this task:\n"
                 + "  " + task.getDisplayText() + "\n"
                 + "Now you have " + taskList.size() + " tasks in the list.";
         return withSavingWarning(response);
@@ -185,13 +185,13 @@ public class WooferService {
      */
     private String undoTask() throws WooferException {
         if (undoAction == null) {
-            throw new WooferException("Nothing to undo.");
+            throw new WooferException("No previous task change to undo. Our trail starts here!");
         }
 
         UndoAction action = undoAction;
         undoAction = null;
         action.undo();
-        return withSavingWarning("Undid the previous command.");
+        return withSavingWarning("Back we go! I undid the previous command.");
     }
 
     /**
@@ -204,7 +204,7 @@ public class WooferService {
     private Task getTaskOrThrow(int taskNumber) throws WooferException {
         Task task = taskList.getTask(taskNumber);
         if (task == null) {
-            throw new WooferException("That task does not exist.");
+            throw new WooferException("I couldn't sniff out that task number. Use list to see your tasks.");
         }
         return task;
     }
