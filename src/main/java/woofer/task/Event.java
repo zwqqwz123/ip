@@ -18,11 +18,15 @@ public class Event extends Task {
      *
      * @param description text describing the event.
      * @param from date when the event starts.
-    * @param to date when the event ends.
+     * @param to date when the event ends.
+     * @throws IllegalArgumentException when the end date is not after the start date.
      */
     public Event(String description, LocalDate from, LocalDate to) {
         super(description, TaskType.EVENT);
         assert from != null && to != null : "Event dates must not be null";
+        if (!to.isAfter(from)) {
+            throw new IllegalArgumentException("The event end date must be after its start date.");
+        }
         this.from = from;
         this.to = to;
     }
