@@ -3,9 +3,11 @@ package woofer.task;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
@@ -108,4 +110,59 @@ public class TaskListTest {
         assertFalse(taskList.addTask("one task too many"));
         assertEquals(100, taskList.size());
     }
+
+    /** Checks insertion at both boundaries and rejection outside the valid range. */
+    @Test
+    public void insertionBoundariesAndCapacity() {
+        TaskList tasks = new TaskList();
+        Task first = new Todo("first");
+        assertFalse(tasks.insertTask(0, first));
+        assertFalse(tasks.insertTask(2, first));
+        assertTrue(tasks.insertTask(1, first));
+        Task last = new Todo("last");
+        assertTrue(tasks.insertTask(2, last));
+        assertEquals(List.of(first, last), tasks.getTasks());
+        for (int i = 2; i < 100; i++) {
+            assertTrue(tasks.addTask("task " + i));
+        }
+        assertFalse(tasks.insertTask(1, new Todo("overflow")));
+        assertNull(tasks.deleteTask(0));
+        assertNull(tasks.deleteTask(-1));
+        assertNull(tasks.deleteTask(101));
+        assertEquals(100, tasks.size());
+        tasks.deleteTask(100);
+        assertTrue(tasks.insertTask(100, last));
+    }
+
+    /** Checks list snapshots cannot be structurally mutated and do not grow with the source. */
+    @Test
+    public void snapshotsAndSearchResultsAreUnmodifiable() {
+        TaskList tasks = new TaskList();
+        tasks.addTask("walk dog");
+        List<Task> snapshot = tasks.getTasks();
+        List<Task> matches = tasks.findTasks("dog");
+        assertThrows(UnsupportedOperationException.class, snapshot::clear);
+        assertThrows(UnsupportedOperationException.class, matches::clear);
+        tasks.addTask("feed dog");
+        assertEquals(1, snapshot.size());
+        assertEquals(1, matches.size());
+        assertTrue(tasks.findTasks(null).isEmpty());
+        assertTrue(tasks.findTasks("  ").isEmpty());
+        assertTrue(tasks.findTasks("").isEmpty());
+    }
+
+    /** Checks search uses a stable locale even when the system language has different casing rules. */
+    @Test
+    public void searchIsIndependentOfDefaultLocale() {
+        Locale original = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            TaskList tasks = new TaskList();
+            tasks.addTask("FINISH homework");
+            assertEquals(1, tasks.findTasks("finish").size());
+        } finally {
+            Locale.setDefault(original);
+        }
+    }
+
 }
