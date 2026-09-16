@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -97,4 +98,80 @@ public class StorageTest {
         assertThrows(IOException.class, storage::load);
         assertThrows(IOException.class, () -> storage.save(new TaskList()));
     }
+
+    /**
+     * Checks blank lines and UTF-8 text, and verifies exact serialization of completed dated tasks.
+     *
+     * @throws IOException when temporary storage fails.
+     */
+    @Test
+    public void unicodeAndCompletedDatesRoundTrip() throws IOException {
+        Path file = directory.resolve("tasks.txt");
+        Files.writeString(file, "\nD | 1 | 买食物 | 2028-02-29\n\n"
+                + "E | 1 | café | 2026-12-31 | 2027-01-01\n");
+        Storage storage = new Storage(file);
+        TaskList tasks = storage.load();
+        assertEquals(2, tasks.size());
+        storage.save(tasks);
+        assertEquals(List.of("D | 1 | 买食物 | 2028-02-29",
+                "E | 1 | café | 2026-12-31 | 2027-01-01"), Files.readAllLines(file));
+        assertEquals("买食物", storage.load().getTask(1).getDescription());
+    }
+
+    /**
+     * Checks a repaired file can be loaded again and an empty save clears all old records.
+     *
+     * @throws IOException when temporary storage fails.
+     */
+    @Test
+    public void repairedFileCanBeLoadedAndCleared() throws IOException {
+        Path file = directory.resolve("tasks.txt");
+        Files.writeString(file, "broken");
+        Storage storage = new Storage(file);
+        assertThrows(IOException.class, storage::load);
+        Files.writeString(file, "T | 0 | repaired");
+        assertEquals(1, storage.load().size());
+        storage.save(new TaskList());
+        assertEquals("", Files.readString(file));
+        assertEquals(0, storage.load().size());
+    }
+
+    /**
+     * Checks malformed UTF-8 and missing fields are rejected without modifying the file.
+     *
+     * @throws IOException when creating fixtures fails.
+     */
+    @Test
+    public void invalidEncodingAndMissingFieldsAreRejected() throws IOException {
+        Path file = directory.resolve("tasks.txt");
+        Files.write(file, new byte[]{(byte) 0xc3, (byte) 0x28});
+        Storage storage = new Storage(file);
+        assertThrows(IOException.class, storage::load);
+        assertThrows(IOException.class, () -> storage.save(new TaskList()));
+        for (String record : new String[]{"broken", "T | 0", "D | 0 | task |", "E | 0 | task | 2026-09-17"}) {
+            Files.writeString(file, record);
+            assertThrows(IOException.class, storage::load, record);
+            assertEquals(record, Files.readString(file));
+        }
+    }
+
+    /**
+     * Checks a failed replacement retains the target and removes the temporary save file.
+     *
+     * @throws IOException when creating fixtures fails.
+     */
+    @Test
+    public void failedReplacementCleansTemporaryFile() throws IOException {
+        Path target = directory.resolve("tasks.txt");
+        Storage storage = new Storage(target);
+        storage.load();
+        Files.createDirectory(target);
+        Files.writeString(target.resolve("keep.txt"), "keep");
+        assertThrows(IOException.class, () -> storage.save(new TaskList()));
+        assertEquals("keep", Files.readString(target.resolve("keep.txt")));
+        try (var files = Files.list(directory)) {
+            assertEquals(List.of(target), files.toList());
+        }
+    }
+
 }

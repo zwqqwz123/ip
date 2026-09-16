@@ -3,6 +3,7 @@ package woofer.parser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import woofer.exception.WooferException;
 import woofer.task.Deadline;
+import woofer.task.Event;
 import woofer.task.Task;
 import woofer.task.Todo;
 
@@ -172,4 +174,55 @@ public class ParserTest {
                     parser.parseTaskNumber("delete " + number, Parser.CommandType.DELETE));
         }
     }
+
+    /**
+     * Checks every command routes to the appropriate service operation.
+     *
+     * @throws WooferException when valid commands fail.
+     */
+    @Test
+    public void classifiesEveryCommand() throws WooferException {
+        String[] commands = {"bye", "undo", "list", "find dog", "delete 1", "mark 1", "unmark 1", "todo dog"};
+        Parser.CommandType[] types = {Parser.CommandType.EXIT, Parser.CommandType.UNDO, Parser.CommandType.LIST,
+            Parser.CommandType.FIND, Parser.CommandType.DELETE, Parser.CommandType.MARK,
+            Parser.CommandType.UNMARK, Parser.CommandType.ADD};
+        for (int i = 0; i < commands.length; i++) {
+            assertEquals(types[i], parser.parseCommandType(commands[i]), commands[i]);
+        }
+        assertEquals(1, parser.parseTaskNumber("unmark 1", Parser.CommandType.UNMARK));
+        assertEquals(Integer.MAX_VALUE,
+                parser.parseTaskNumber("delete 2147483647", Parser.CommandType.DELETE));
+        assertThrows(WooferException.class, () -> parser.parseTaskNumber("list", Parser.CommandType.LIST));
+    }
+
+    /**
+     * Checks valid leap days, event dates, and non-English descriptions are preserved.
+     *
+     * @throws WooferException when valid commands fail.
+     */
+    @Test
+    public void parsesLeapDayEventAndUnicode() throws WooferException {
+        Event event = assertInstanceOf(Event.class,
+                parser.parseTask("event 遛狗 /from 2028-02-29 /to 2028-03-01"));
+        assertEquals("遛狗", event.getDescription());
+        assertEquals(LocalDate.of(2028, 2, 29), event.getFrom());
+        assertEquals(LocalDate.of(2028, 3, 1), event.getTo());
+        assertEquals("buy food & treats!", parser.parseTask("todo buy food & treats!").getDescription());
+    }
+
+    /** Checks missing values, attached command prefixes, and unknown commands report required syntax. */
+    @Test
+    public void malformedVariantsReportSyntax() {
+        String[] commands = {"todowalk", "deadlinefoo", "eventfoo", "dance", "TODO walk",
+            "deadline", "deadline task /by", "deadline task /by /from 2026-09-17",
+            "event", "event /from 2026-09-17 /to 2026-09-18",
+            "event task /from /to 2026-09-18", "event task /from 2026-09-17",
+            "event task /to 2026-09-18 /from 2026-09-17",
+            "event task /from invalid /to 2026-09-18"};
+        for (String command : commands) {
+            WooferException error = assertThrows(WooferException.class, () -> parser.parseTask(command), command);
+            assertTrue(error.getMessage().startsWith("Required format:"), command);
+        }
+    }
+
 }

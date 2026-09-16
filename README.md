@@ -40,3 +40,7 @@ ________________________________________________________________________________
 - Identical tasks remain allowed, since repeated chores can be intentional.
 - A missing `data/woofer.txt` is normal on first use. An unreadable or malformed file produces a startup warning and disables saving for that session, protecting the original file. Check the file's records and permissions, repair it, then restart Woofer. Tasks entered during this session are only in memory.
 - Saves use a temporary file and atomic replacement. If writing or atomic replacement fails, Woofer warns that changes are only in memory. Resolve the file/folder problem and make another task change to retry saving before closing the app.
+
+## Testing
+
+Run `./gradlew test checkstyleMain checkstyleTest` with Java 25. See [the testing guide](docs/Testing.md) for the automated test scope, isolated test-data setup, and a manual GUI/platform checklist.
