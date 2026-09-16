@@ -2,37 +2,34 @@ package woofer.gui;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 
 /**
- * Represents one conversation message with a speaker label and message text.
+ * Displays a labelled message with different layouts for commands, replies, and errors.
  */
-public class DialogBox extends HBox {
-    /** Label containing the conversation message. */
+public class DialogBox extends VBox {
+    /** Wrapping message text, sized relative to the available conversation width. */
     @FXML
     private Label dialog;
 
-    /** Label identifying the speaker. */
+    /** Text identifying the speaker and, when needed, the error state. */
     @FXML
-    private Label avatar;
+    private Label speaker;
 
     /**
-     * Creates a dialog box from its FXML layout.
+     * Loads a message layout and applies its presentation style.
      *
-     * @param text message text.
-     * @param speaker speaker label.
+     * @param text message content.
+     * @param heading visible speaker or status label.
+     * @param styleClass CSS class identifying the message type.
+     * @param isUser whether to use a compact, right-aligned command bubble.
      */
-    private DialogBox(String text, String speaker) {
+    private DialogBox(String text, String heading, String styleClass, boolean isUser) {
         URL fxmlResource = DialogBox.class.getResource("/view/DialogBox.fxml");
         if (fxmlResource == null) {
             throw new IllegalStateException("Unable to find the dialog box resource.");
@@ -48,41 +45,44 @@ public class DialogBox extends HBox {
         }
 
         dialog.setText(text);
-        avatar.setText(speaker);
-        getStyleClass().add("dialog-box");
-        HBox.setHgrow(dialog, Priority.ALWAYS);
+        speaker.setText(heading);
+        getStyleClass().add(styleClass);
+        setFillWidth(false);
+        setAlignment(isUser ? Pos.TOP_RIGHT : Pos.TOP_LEFT);
+        // Bot responses use the full width; commands leave a small visual indent.
+        dialog.maxWidthProperty().bind(widthProperty().multiply(isUser ? 0.85 : 1.0));
+        if (!isUser) {
+            dialog.setPrefWidth(Double.MAX_VALUE);
+        }
     }
 
     /**
-     * Flips the dialog box so that Woofer's responses appear on the left.
-     */
-    private void flip() {
-        ObservableList<Node> children = FXCollections.observableArrayList(getChildren());
-        Collections.reverse(children);
-        getChildren().setAll(children);
-        setAlignment(Pos.TOP_LEFT);
-        dialog.getStyleClass().add("reply-label");
-    }
-
-    /**
-     * Creates a dialog box for a user message.
+     * Creates a compact, right-aligned user command.
      *
      * @param text user message text.
-     * @return a right-aligned user dialog box.
+     * @return the user dialog box.
      */
     public static DialogBox getUserDialog(String text) {
-        return new DialogBox(text, "You");
+        return new DialogBox(text, "YOU", "user-message", true);
     }
 
     /**
-     * Creates a dialog box for a Woofer response.
+     * Creates a full-width Woofer response.
      *
      * @param text Woofer response text.
-     * @return a left-aligned Woofer dialog box.
+     * @return the response dialog box.
      */
     public static DialogBox getWooferDialog(String text) {
-        DialogBox dialogBox = new DialogBox(text, "W");
-        dialogBox.flip();
-        return dialogBox;
+        return new DialogBox(text, "WOOFER", "woofer-message", false);
+    }
+
+    /**
+     * Creates a visually distinct error with a textual status for accessibility.
+     *
+     * @param text explanation of the problem.
+     * @return the error dialog box.
+     */
+    public static DialogBox getErrorDialog(String text) {
+        return new DialogBox(text, "WOOFER · ATTENTION", "error-message", false);
     }
 }

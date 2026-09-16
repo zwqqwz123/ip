@@ -51,10 +51,10 @@ public class MainWindow extends AnchorPane {
     public void setWooferService(WooferService service) {
         wooferService = service;
         if (service.hasLoadingError()) {
-            appendWooferMessage("Warning: Could not load saved tasks. "
+            appendErrorMessage("Could not load saved tasks. "
                     + "Starting with an empty list.");
         }
-        userInput.requestFocus();
+        Platform.runLater(userInput::requestFocus);
     }
 
     /**
@@ -68,17 +68,31 @@ public class MainWindow extends AnchorPane {
         }
 
         appendUserMessage(input);
-        userInput.clear();
 
         try {
             WooferService.Response response = wooferService.execute(input);
+            userInput.clear();
             appendWooferMessage(response.message());
             if (response.exits()) {
                 disableInput();
             }
         } catch (WooferException exception) {
-            appendWooferMessage("OOPS!!! " + exception.getMessage());
+            appendErrorMessage(exception.getMessage());
         }
+        if (!userInput.isDisabled()) {
+            userInput.requestFocus();
+            userInput.positionCaret(userInput.getLength());
+        }
+    }
+
+    /**
+     * Highlights a problem without relying on colour alone to communicate its status.
+     *
+     * @param message explanation of the problem.
+     */
+    private void appendErrorMessage(String message) {
+        dialogContainer.getChildren().add(DialogBox.getErrorDialog(message));
+        scrollToBottom();
     }
 
     /**
